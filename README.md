@@ -10,6 +10,6 @@ This will hold all the gws.
 
 This will hold all the xslt.
 
-## yaml/openapi/swagger
+## swagger
 
 This will hold the swagger definition that I work with.

@@ -15,7 +15,7 @@ visibility:
     tags: []
     orgs: []
 apis:
-  consent:
+  utility:
     id: 5862e4d5e4b0e71c4afd7d97
 plans:
   default:

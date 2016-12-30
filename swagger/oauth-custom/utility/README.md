@@ -13,7 +13,7 @@ Note that this is work in progress, and as time allowed, and more customization 
 
 ## using authenticate-url generic, /basic-auth-generic   
 ```
-~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth-generic?password=spoon&username=spoon' --user spoon:spoon
+~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth-generic/spoon/spoon' --user spoon:spoon
 *   Trying 9.33.69.166...
 ...
 * TLS 1.2 connection using TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
@@ -24,7 +24,7 @@ Note that this is work in progress, and as time allowed, and more customization 
 ```
 ## using authenticate-url, /basic-auth   
 ```
-~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth?password=spoon&username=spoon' --user spoon:spoon
+~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth/spoon/spoon' --user spoon:spoon
 *   Trying 9.33.69.166...
 ...
 * TLS 1.2 connection using TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
@@ -38,10 +38,10 @@ Note that this is work in progress, and as time allowed, and more customization 
 ```
 ## using authenticate-url, /basic-auth-metadata
 ```
-~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth-metadata?password=spoon&username=spoon' --user spoon:spoon
+~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth-metadata/spoon/spoon' --user spoon:spoon
 ...
 * Server auth using Basic with user 'spoon'
-> GET /poon/sb/consent/basic-auth-metadata?password=spoon&username=spoon HTTP/1.1
+> GET /poon/sb/consent/basic-auth-metadata/spoon/spoon HTTP/1.1
 ...
 > 
 < HTTP/1.1 200 OK

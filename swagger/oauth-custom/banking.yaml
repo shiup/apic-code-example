@@ -1,0 +1,64 @@
+swagger: '2.0'
+info:
+  x-ibm-name: banking
+  title: banking
+  version: 1.0.0
+schemes:
+  - https
+host: $(catalog.host)
+basePath: /bankiing
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  oauth-1:
+    type: oauth2
+    description: ''
+    flow: implicit
+    authorizationUrl: ''
+    scopes:
+      checking: Checking Account
+      saving: Saving Account
+      mutual: Mutual Fund
+      personal: Personal Information
+  clientIdHeader:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientIdHeader: []
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  cors:
+    enabled: true
+  assembly:
+    execute:
+      - invoke:
+          target-url: $(target-url)$(request.path)
+  phase: realized
+paths:
+  '/saving/{account}':
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - $ref: '#/parameters/account'
+  '/checking/{account}':
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - $ref: '#/parameters/account'
+definitions: {}
+tags: []
+parameters:
+  account:
+    name: account
+    type: string
+    required: true
+    in: path
+    description: Account Number

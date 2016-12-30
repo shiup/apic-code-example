@@ -1,0 +1,160 @@
+swagger: '2.0'
+info:
+  x-ibm-name: utility
+  title: utility
+  version: 1.0.0
+schemes:
+  - https
+host: $(catalog.host)
+basePath: /utility
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions: {}
+security:
+  - {}
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  cors:
+    enabled: true
+  assembly:
+    execute:
+      - switch:
+          title: switch
+          case:
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth'))"
+              execute:
+                - gatewayscript:
+                    title: Authenticate
+                    version: 1.0.0
+                    description: Create Authentication URL
+                    source: |
+                      // author : @spoon or @shiup
+                      var apic = require('./apim.custom.js');
+                      apic.output('application/json');
+                      var reqauth = apic.getvariable('request.authorization').split(' ');
+                      var splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');
+                      var username = splitval[0] || '';
+                      var password = splitval[1] || '';
+                      apic.console.debug('user credential : [' + username + ':' + password + ']');
+                      if (username === apic.getvariable('request.parameters.username') && password === apic.getvariable('request.parameters.password')) {
+                          session.output.write({"authenticatedUser":username});
+                          apic.setvariable('message.headers.api-authenticated-credential', 'cn=' + username + ',email=' + username + '@poon.com');
+                          apic.setvariable('message.status.code', 200)
+                      }
+                      else {
+                          apic.setvariable('message.status.code', 401);
+                      }
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-metadata'))"
+              execute:
+                - gatewayscript:
+                    title: Authenticate
+                    version: 1.0.0
+                    description: Create Authentication URL
+                    source: |
+                      // author : @spoon or @shiup
+                      var apic = require('./apim.custom.js');
+                      apic.output('application/json');
+                      var reqauth = apic.getvariable('request.authorization').split(' ');
+                      var splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');
+                      var username = splitval[0] || '';
+                      var password = splitval[1] || '';
+                      apic.console.debug('user credential : [' + username + ':' + password + ']');
+                      if (username === apic.getvariable('request.parameters.username') && password === apic.getvariable('request.parameters.password')) {
+                          session.output.write({"authenticatedUser":username});
+                          apic.setvariable('message.headers.api-authenticated-credential', 'cn=' + username + ',email=' + username + '@poon.com');
+                          apic.setvariable('message.status.code', 200)
+                      }
+                      else {
+                          apic.setvariable('message.status.code', 401);
+                      }
+                - gatewayscript:
+                    title: SetMetaData
+                    version: 1.0.0
+                    source: |-
+                      var apic = require('./apim.custom.js');
+                      apic.setvariable('message.headers.api-oauth-metadata-for-accesstoken', 'custom metadata for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
+                      apic.setvariable('message.headers.api-oauth-metadata-for-payload', 'custom payload data for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-login-form'))"
+              execute:
+                - gatewayscript:
+                    title: create-custom-login-form
+                    version: 1.0.0
+                    source: "var form = '<html lang=\"en\" xml:lang=\"en\">' +\n           '<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>Spoon Company</head>' +\n           '<body>' +\n           '<form method=\"POST\" enctype=\"application/x-www-form-urlencoded\" action=\"authorize\">' + \n           '<h1>Please sign in</h1>' +\n           '<p>Username </p>' +\n           '<p style=\"text-indent: 0em;\"><input type=\"text\" name=\"username\" required=\"required\"/></p>' +\n           '<p>Password </p>' +\n           '<p style=\"text-indent: 0em;\"><input type=\"password\" name=\"password\" required=\"required\"/></p>' +\n           '<EI-INJECT-HIDDEN-INPUT-FIELDS/>' +\n           '<p style=\"text-indent: 2em;\"> <button id=\"login_button\" type=\"submit\" name=\"login\" value=\"true\">Log in</button> </p>' +\n           '<EI-LOGINFIRSTTIME><p>If you have forgotten your user name or password, contact your system administrator.</p></EI-LOGINFIRSTTIME>' +\n           '<EI-LOGINFAILED><p style=\"color: red\">At least one of your entries does not match our records. ' +\n           'If you have forgotten your user name or password, contact your system administrator.</p></EI-LOGINFAILED>' +\n           '<EI-INTERNAL-CUSTOM-FORM-ERROR/>' +\n           '</form></body></html>';\nsession.output.write(form);\napim.output('text/html');\napim.setvariable('message.status.code', 200);"
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-consent-form'))"
+              execute:
+                - gatewayscript:
+                    title: create-custom-consent-form
+                    version: 1.0.0
+                    source: |
+                      var formPost5060 = '<html lang="en" xml:lang="en">' +
+                        '<head><title>Request for permission</title></head>' +
+                        '<body class="customconsent"><div><div>' +
+                        '<form method="post" enctype="application/x-www-form-urlencoded" action="authorize">' +
+                        '<AZ-INJECT-HIDDEN-INPUT-FIELDS/>' +
+                        '<p>Greeting..</p><DISPLAY-RESOURCE-OWNER/>' +
+                        '<p>This app </p><OAUTH-APPLICATION-NAME/><p> would like to access your data.</p>' +
+                        '<div>' +
+                        '<button class="cancel" type="submit" name="approve" value="false">No Thanks</button>' +
+                        '<button class="submit" type="submit" name="approve" value="true">Allow Access</button>' +
+                        '</div></form></div>' +
+                        '<AZ-INTERNAL-CUSTOM-FORM-ERROR/>' +
+                        '</div></body></html>';
+
+                      session.output.write(formPost5060);
+                      apim.output('text/html');
+                      apim.setvariable('message.status.code', 200);
+            - otherwise:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: "require('./apim.custom.js').setvariable('message.status.code', 500);"
+          version: 1.0.0
+  phase: realized
+paths:
+  /custom-consent-form:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+  /custom-login-form:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+  /basic-auth-metadata:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - name: username
+        type: string
+        required: true
+        in: query
+        description: User Name
+      - name: password
+        type: string
+        required: true
+        in: query
+        description: Password
+  /basic-auth:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - name: username
+        type: string
+        required: true
+        in: query
+        description: UserName
+      - name: password
+        type: string
+        required: true
+        in: query
+        description: Password
+definitions: {}
+tags: []

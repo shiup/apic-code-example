@@ -95,7 +95,7 @@ x-ibm-configuration:
                 - gatewayscript:
                     title: create-custom-login-form
                     version: 1.0.0
-                    source: "var form = '<html lang=\"en\" xml:lang=\"en\">' +\n           '<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>Spoon Company</head>' +\n           '<body>' +\n           '<form method=\"POST\" enctype=\"application/x-www-form-urlencoded\" action=\"authorize\">' + \n           '<h1>Please sign in</h1>' +\n           '<p>Username </p>' +\n           '<p style=\"text-indent: 0em;\"><input type=\"text\" name=\"username\" required=\"required\"/></p>' +\n           '<p>Password </p>' +\n           '<p style=\"text-indent: 0em;\"><input type=\"password\" name=\"password\" required=\"required\"/></p>' +\n           '<EI-INJECT-HIDDEN-INPUT-FIELDS/>' +\n           '<p style=\"text-indent: 2em;\"> <button id=\"login_button\" type=\"submit\" name=\"login\" value=\"true\">Log in</button> </p>' +\n           '<EI-LOGINFIRSTTIME><p>If you have forgotten your user name or password, contact your system administrator.</p></EI-LOGINFIRSTTIME>' +\n           '<EI-LOGINFAILED><p style=\"color: red\">At least one of your entries does not match our records. ' +\n           'If you have forgotten your user name or password, contact your system administrator.</p></EI-LOGINFAILED>' +\n           '<EI-INTERNAL-CUSTOM-FORM-ERROR/>' +\n           '</form></body></html>';\nsession.output.write(form);\napim.output('text/html');\napim.setvariable('message.status.code', 200);"
+                    source: "// @spoon\nvar form = '<html lang=\"en\" xml:lang=\"en\">' +\n  '<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>Spoon Company</head>' +\n  '<body>' +\n  '<form method=\"POST\" enctype=\"application/x-www-form-urlencoded\" action=\"authorize\">' + \n  '<h1>Please sign in</h1>' +\n  '<p>Username </p>' +\n  '<p style=\"text-indent: 0em;\"><input type=\"text\" name=\"username\" required=\"required\"/></p>' +\n  '<p>Password </p>' +\n  '<p style=\"text-indent: 0em;\"><input type=\"password\" name=\"password\" required=\"required\"/></p>' +\n  '<EI-INJECT-HIDDEN-INPUT-FIELDS/>' +\n  '<p style=\"text-indent: 2em;\"> <button id=\"login_button\" type=\"submit\" name=\"login\" value=\"true\">Log in</button> </p>' +\n  '<EI-LOGINFIRSTTIME><p>If you have forgotten your user name or password, contact your system administrator.</p></EI-LOGINFIRSTTIME>' +\n  '<EI-LOGINFAILED><p style=\"color: red\">At least one of your entries does not match our records. ' +\n  'If you have forgotten your user name or password, contact your system administrator.</p></EI-LOGINFAILED>' +\n  '<EI-INTERNAL-CUSTOM-FORM-ERROR/>' +\n  '</form></body></html>';\n  session.output.write(form);\n  apim.output('text/html');\n  apim.setvariable('message.status.code', 200);\n"
             - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-consent-form'))"
               execute:
                 - gatewayscript:
@@ -115,7 +115,30 @@ x-ibm-configuration:
                         '</div></form></div>' +
                         '<AZ-INTERNAL-CUSTOM-FORM-ERROR/>' +
                         '</div></body></html>';
+
                       session.output.write(formPost5060);
+
+                      /*
+                      **************************
+                      however there is a known issue with this support, that will be fixed in future, post 5060 release.  So for now, use the following instead
+                      ***************************
+                      */
+                      var formUpTo5060 = '<html lang="en" xml:lang="en">' +
+                        '<head><title>Request for permission</title></head>' +
+                        '<body class="customconsent"><div><div>' +
+                        '<form method="post" enctype="application/x-www-form-urlencoded" action="authorize">' +
+                        '<input type="hidden" name="original-url" value="A"/>' +
+                        '<input type="hidden" name="client_id" value="A"/>' +
+                        '<AZ-INJECT-HIDDEN-INPUT-FIELDS/>' +
+                        '<p>Greeting..</p><DISPLAY-RESOURCE-OWNER/>' +
+                        '<p>This app </p><OAUTH-APPLICATION-NAME/><p> would like to access your data.</p>' +
+                        '<div>' +
+                        '<button class="cancel" type="submit" name="approve" value="false">No Thanks</button>' +
+                        '<button class="submit" type="submit" name="approve" value="true">Allow Access</button>' +
+                        '</div></form></div>' +
+                        '<AZ-INTERNAL-CUSTOM-FORM-ERROR/>' +
+                        '</div></body></html>';
+                      session.output.write(formUpTo5060);
                       apim.output('text/html');
                       apim.setvariable('message.status.code', 200);
             - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-generic'))"

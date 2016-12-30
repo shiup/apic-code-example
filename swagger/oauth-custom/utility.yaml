@@ -1,3 +1,16 @@
+# Author : @spoon or @shiup
+# This yaml is used to showcase how to customize oauth
+# To test this individually, 
+#   1. custom consent form  
+#      curl -k -v 'https://datapower/spoon/sb/utility/custom-consent-form'
+#   2. custom login form
+#      curl -k -v 'https://datapower/spoon/sb/utility/custom-login-form'
+#   3. generic authenticate-url
+#      curl -k -v https://datapower/spoon/sb/utility/basic-auth-generic?username=spoon&password=spoon --user spoon:spoon
+#   4. authenticate-url which provides resource owner credential
+#      curl -k -v https://datapower/spoon/sb/utility/basic-auth?username=spoon&password=spoon --user spoon:spoon
+#   5. authenticate-url which provides resource owner credential + metadata for both access_token & access token payload
+#      curl -k -v https://datapower/spoon/sb/utility/basic-auth?username=spoon&password=spoon --user spoon:spoon
 swagger: '2.0'
 info:
   x-ibm-name: utility
@@ -106,6 +119,27 @@ x-ibm-configuration:
                       session.output.write(formPost5060);
                       apim.output('text/html');
                       apim.setvariable('message.status.code', 200);
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-generic'))"
+              execute:
+                - gatewayscript:
+                    title: Generice authenticate-url response
+                    version: 1.0.0
+                    source: |
+                      // author : @spoon or @shiup
+                      var apic = require('./apim.custom.js');
+                      apic.output('application/json');
+                      var reqauth = apic.getvariable('request.authorization').split(' ');
+                      var splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');
+                      var username = splitval[0] || '';
+                      var password = splitval[1] || '';
+                      apic.console.debug('user credential : [' + username + ':' + password + ']');
+                      if (username === apic.getvariable('request.parameters.username') && password === apic.getvariable('request.parameters.password')) {
+                          session.output.write({"authenticatedUser":username});
+                          apic.setvariable('message.status.code', 200)
+                      }
+                      else {
+                          apic.setvariable('message.status.code', 401);
+                      }
             - otherwise:
                 - gatewayscript:
                     title: gatewayscript
@@ -114,6 +148,20 @@ x-ibm-configuration:
           version: 1.0.0
   phase: realized
 paths:
+  /basic-auth-generic:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - name: username
+        type: string
+        required: true
+        in: query
+      - name: password
+        type: string
+        required: true
+        in: query
   /custom-consent-form:
     get:
       responses:

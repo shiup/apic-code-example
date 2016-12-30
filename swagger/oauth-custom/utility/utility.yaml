@@ -6,11 +6,11 @@
 #   2. custom login form
 #      curl -k -v 'https://datapower/spoon/sb/utility/custom-login-form'
 #   3. generic authenticate-url
-#      curl -k -v https://datapower/spoon/sb/utility/basic-auth-generic?username=spoon&password=spoon --user spoon:spoon
+#      curl -k -v https://datapower/spoon/sb/utility/basic-auth-generic/spoon/spoon --user spoon:spoon
 #   4. authenticate-url which provides resource owner credential
-#      curl -k -v https://datapower/spoon/sb/utility/basic-auth?username=spoon&password=spoon --user spoon:spoon
+#      curl -k -v https://datapower/spoon/sb/utility/basic-auth/spoon/spoon --user spoon:spoon
 #   5. authenticate-url which provides resource owner credential + metadata for both access_token & access token payload
-#      curl -k -v https://datapower/spoon/sb/utility/basic-auth?username=spoon&password=spoon --user spoon:spoon
+#      curl -k -v https://datapower/spoon/sb/utility/basic-auth-metadata/spoon/spoon --user spoon:spoon
 swagger: '2.0'
 info:
   x-ibm-name: utility
@@ -37,7 +37,7 @@ x-ibm-configuration:
       - switch:
           title: switch
           case:
-            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth'))"
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth/{username}/{password}'))"
               execute:
                 - gatewayscript:
                     title: Authenticate
@@ -47,6 +47,7 @@ x-ibm-configuration:
                       // author : @spoon or @shiup
                       var apic = require('./apim.custom.js');
                       apic.output('application/json');
+
                       var reqauth = apic.getvariable('request.authorization').split(' ');
                       var splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');
                       var username = splitval[0] || '';
@@ -60,7 +61,7 @@ x-ibm-configuration:
                       else {
                           apic.setvariable('message.status.code', 401);
                       }
-            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-metadata'))"
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-metadata/{username}/{password}'))"
               execute:
                 - gatewayscript:
                     title: Authenticate
@@ -141,7 +142,7 @@ x-ibm-configuration:
                       session.output.write(formUpTo5060);
                       apim.output('text/html');
                       apim.setvariable('message.status.code', 200);
-            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-generic'))"
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-generic/{username}/{password}'))"
               execute:
                 - gatewayscript:
                     title: Generice authenticate-url response
@@ -170,20 +171,14 @@ x-ibm-configuration:
           version: 1.0.0
   phase: realized
 paths:
-  /basic-auth-generic:
+  '/basic-auth-generic/{username}/{password}':
     get:
       responses:
         '200':
           description: 200 OK
     parameters:
-      - name: username
-        type: string
-        required: true
-        in: query
-      - name: password
-        type: string
-        required: true
-        in: query
+      - $ref: '#/parameters/username'
+      - $ref: '#/parameters/password'
   /custom-consent-form:
     get:
       responses:
@@ -194,37 +189,34 @@ paths:
       responses:
         '200':
           description: 200 OK
-  /basic-auth-metadata:
+  '/basic-auth-metadata/{username}/{password}':
     get:
       responses:
         '200':
           description: 200 OK
     parameters:
-      - name: username
-        type: string
-        required: true
-        in: query
-        description: User Name
-      - name: password
-        type: string
-        required: true
-        in: query
-        description: Password
-  /basic-auth:
+      - $ref: '#/parameters/username'
+      - $ref: '#/parameters/password'
+  '/basic-auth/{username}/{password}':
     get:
       responses:
         '200':
           description: 200 OK
     parameters:
-      - name: username
-        type: string
-        required: true
-        in: query
-        description: UserName
-      - name: password
-        type: string
-        required: true
-        in: query
-        description: Password
+      - $ref: '#/parameters/username'
+      - $ref: '#/parameters/password'
 definitions: {}
 tags: []
+parameters:
+  username:
+    name: username
+    type: string
+    required: true
+    in: path
+    description: User Name
+  password:
+    name: password
+    type: string
+    required: true
+    in: path
+    description: Password

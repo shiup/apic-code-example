@@ -6,7 +6,7 @@ info:
 schemes:
   - https
 host: $(catalog.host)
-basePath: /bankiing
+basePath: /banking
 consumes:
   - application/json
 produces:
@@ -18,10 +18,9 @@ securityDefinitions:
     flow: implicit
     authorizationUrl: ''
     scopes:
-      checking: Checking Account
-      saving: Saving Account
-      mutual: Mutual Fund
-      personal: Personal Information
+      checking: ''
+      saving: ''
+      mutual: owner@spoon.com
   clientIdHeader:
     type: apiKey
     in: header
@@ -35,22 +34,35 @@ x-ibm-configuration:
     enabled: true
   assembly:
     execute:
-      - invoke:
-          target-url: $(target-url)$(request.path)
+      - operation-switch:
+          title: operation-switch
+          case:
+            - operations:
+                - verb: get
+                  path: '/checking/{account}'
+              execute:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: |-
+                      var body={'account':apim.getvariable('request.parameters.account'), 'owner':apim.getvariable('oauth.resource-owner'), 'scope':apim.getvariable('oauth.scope'), 'miscinfo':apim.getvariable('oauth.miscinfo'), 'notbefore':apim.getvariable('oauth.not-before'), 'notafter':apim.getvariable('oauth.not-after')};
+                      body.type = 'checking';
+                      body.balance = 0.88;
+                      session.output.write(body);
+                      apim.output('application/json');
+          otherwise: []
+          version: 1.0.0
   phase: realized
 paths:
-  '/saving/{account}':
-    get:
-      responses:
-        '200':
-          description: 200 OK
-    parameters:
-      - $ref: '#/parameters/account'
   '/checking/{account}':
     get:
       responses:
         '200':
           description: 200 OK
+      security:
+        - oauth-1:
+            - checking
+          clientIdHeader: []
     parameters:
       - $ref: '#/parameters/account'
 definitions: {}
@@ -61,4 +73,3 @@ parameters:
     type: string
     required: true
     in: path
-    description: Account Number

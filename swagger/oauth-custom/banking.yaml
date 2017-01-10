@@ -1,7 +1,10 @@
+##  curl -k -v https://datapower/spoon/sb/banking/saving/dddabc --header 'Authorization: Bearer AAEkZTRkZmQ3OTctOWZkOS00OWI3LWI5ZGItM2RkZTlkODk0NzFjWmoqwQnfbVsZ6Mw8w2tfzefpVExEHpnGb6PqjnZcZYpshGssZgvaMACYE5hc3rSrcU5EK4HYABqIrtlk7yN1wtL' --header 'X-IBM-Client-Id: e4dfd797-9fd9-49b7-b9db-3dde9d89471c'
+##
+
 swagger: '2.0'
 info:
   x-ibm-name: banking
-  title: banking
+  title: Banking
   version: 1.0.0
 schemes:
   - https
@@ -20,7 +23,6 @@ securityDefinitions:
     scopes:
       checking: ''
       saving: ''
-      mutual: owner@spoon.com
   clientIdHeader:
     type: apiKey
     in: header
@@ -39,13 +41,38 @@ x-ibm-configuration:
           case:
             - operations:
                 - verb: get
-                  path: '/checking/{account}'
+                  path: '/saving/{account}'
               execute:
                 - gatewayscript:
                     title: gatewayscript
                     version: 1.0.0
                     source: |-
                       var body={'account':apim.getvariable('request.parameters.account'), 'owner':apim.getvariable('oauth.resource-owner'), 'scope':apim.getvariable('oauth.scope'), 'miscinfo':apim.getvariable('oauth.miscinfo'), 'notbefore':apim.getvariable('oauth.not-before'), 'notafter':apim.getvariable('oauth.not-after')};
+                      body.type = 'saving';
+                      body.balance = 88.88;
+                      session.output.write(body);
+                      apim.output('application/json');
+            - operations:
+                - verb: get
+                  path: '/checking/{account}'
+              execute:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: |-
+                      var miscinfo = apim.getvariable('oauth.miscinfo');
+                      var authenMeta = ']a:';
+                      var metaMeta = ']m:';
+                      var cleanupMiscInfo;
+                      if (miscinfo.indexOf(authenMeta) > 0) {
+                          cleanupMiscInfo = miscinfo.substring(miscinfo.indexOf(authenMeta) + authenMeta.length);
+                      }
+                      else if (miscinfo.indexOf(metaMeta) > 0)
+                          cleanupMiscInfo = miscinfo.substring(miscinfo.indexOf(metaMeta) + metaMeta.length);
+                      else
+                          cleanupMiscInfo = '';
+
+                      var body={'account':apim.getvariable('request.parameters.account'), 'owner':apim.getvariable('oauth.resource-owner'), 'scope':apim.getvariable('oauth.scope'), 'miscinfo':cleanupMiscInfo, 'notbefore':apim.getvariable('oauth.not-before'), 'notafter':apim.getvariable('oauth.not-after')};
                       body.type = 'checking';
                       body.balance = 0.88;
                       session.output.write(body);
@@ -54,15 +81,26 @@ x-ibm-configuration:
           version: 1.0.0
   phase: realized
 paths:
-  '/checking/{account}':
+  '/saving/{account}':
     get:
       responses:
         '200':
           description: 200 OK
       security:
         - oauth-1:
-            - checking
+            - saving
           clientIdHeader: []
+    parameters:
+      - $ref: '#/parameters/account'
+  '/checking/{account}':
+    get:
+      responses:
+        '200':
+          description: 200 OK
+      security:
+        - clientIdHeader: []
+          oauth-1:
+            - checking
     parameters:
       - $ref: '#/parameters/account'
 definitions: {}
@@ -73,3 +111,4 @@ parameters:
     type: string
     required: true
     in: path
+    description: Account Number

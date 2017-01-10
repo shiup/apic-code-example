@@ -14,8 +14,6 @@
 #   6. Add the 'identity extraction' -> 'redirect' support
 #      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing'
 #      2/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
-
-
 swagger: '2.0'
 info:
   x-ibm-name: utility
@@ -96,8 +94,13 @@ x-ibm-configuration:
                     version: 1.0.0
                     source: |-
                       var apic = require('./apim.custom.js');
-                      apic.setvariable('message.headers.api-oauth-metadata-for-accesstoken', 'custom metadata for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
-                      apic.setvariable('message.headers.api-oauth-metadata-for-payload', 'custom payload data for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
+                      var payload = {};
+                      payload.for = 'http header';
+                      payload.username = apic.getvariable('request.parameters.username');
+                      payload.data = 'custom data whatever you want to add here';
+                      apic.setvariable('message.headers.api-oauth-metadata-for-accesstoken', JSON.stringify(payload));
+                      payload.for = 'access token payload';
+                      apic.setvariable('message.headers.api-oauth-metadata-for-payload', JSON.stringify(payload));
             - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-login-form'))"
               execute:
                 - gatewayscript:
@@ -274,4 +277,7 @@ parameters:
     required: true
     in: path
     description: Password
+
+
+
 

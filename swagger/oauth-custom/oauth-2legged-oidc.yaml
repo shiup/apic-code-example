@@ -235,7 +235,39 @@ x-ibm-configuration:
                 - gatewayscript:
                     title: gatewayscript
                     version: 1.0.0
-                    source: "// this logic can be better in\n// handling the sub claim by\n// reading the input as XML nodeset\n// and extract the username  \nvar splitScope = (apim.getvariable('message.body').scope || '').split(' ');\nfor(var i = 0; i < splitScope.length; i++) {\n    if (splitScope[i] === 'openid') {\n        // now that we have the\n        // challenge of what to use\n        // as subject claim. \n        // ToDo this, piggyback off the \n        // metadata for payload, look\n        // for an element name \n        // id-for-oidc.\n        // if this information \n        // does not exist, no oidc \n        // ideally, inspect the \n        // username from the request.\n        //  ^^ for the others as todo\n        \n        var metadata = apim.getvariable(\"message.body\")[\"metadata\"] || '';\n \n        var authenMeta = 'a:';\n        var metaMeta = 'm:';\n        var idForOIDC = \"\";\n        if (metadata.indexOf(authenMeta) >= 0) {\n            idForOIDC = JSON.parse(metadata.substring(metadata.indexOf(authenMeta) + authenMeta.length))[\"id-for-oidc\"] || \"\";\n        }\n        else if (metadata.indexOf(metaMeta) >= 0) {\n            idForOIDC = JSON.parse(metadata.substring(metadata.indexOf(metaMeta) + metaMeta.length))[\"id-for-oidc\"] || \"\";\n        }\n        else {\n            // see above, ideally\n            // extract the username\n            // from the request, for\n            // now, no id_token\n        }\n        if (idForOIDC != \"\") {\n            apim.setvariable('id-4-oidc', idForOIDC, 'set')\n            apim.setvariable('openid', 'yes', 'set');\n        }\n    }\n}"
+                    source: |
+                      // this logic can be better in handling the sub claim by
+                      // reading the input as XML nodeset and extract the username
+                      var splitScope = (apim.getvariable('message.body').scope || '').split(' ');
+                      for (var i = 0; i < splitScope.length; i++) {
+                        if (splitScope[i] === 'openid') {
+                          // now that we have the challenge of what to use
+                          // as subject claim. ToDo this, piggyback off the
+                          // metadata for payload, look for an element name
+                          // id-for-oidc. if this information
+                          // does not exist, no oidc ideally, inspect the
+                          // username from the request.
+                          //  ^^ for the others as todo
+                          var metadata = apim.getvariable("message.body")["metadata"] || '';
+                          var authenMeta = 'a:';
+                          var metaMeta = 'm:';
+                          var idForOIDC = "";
+                          if (metadata.indexOf(authenMeta) >= 0) {
+                            idForOIDC = JSON.parse(metadata.substring(metadata.indexOf(authenMeta) + authenMeta.length))["id-for-oidc"] || "";
+                          }
+                          else if (metadata.indexOf(metaMeta) >= 0) {
+                            idForOIDC = JSON.parse(metadata.substring(metadata.indexOf(metaMeta) + metaMeta.length))["id-for-oidc"] || "";
+                          }
+                          else {
+                            // see above, ideally extract the username
+                            // from the request, for now, no id_token
+                          }
+                          if (idForOIDC != "") {
+                            apim.setvariable('id-4-oidc', idForOIDC, 'set');
+                            apim.setvariable('openid', 'yes', 'set');
+                          }
+                        }
+                      }
                 - if:
                     title: if
                     condition: "apim.getvariable('openid') === 'yes'"

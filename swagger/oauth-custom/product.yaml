@@ -1,0 +1,31 @@
+product: 1.0.0
+info:
+  name: banking
+  title: Banking
+  version: 1.0.0
+visibility:
+  view:
+    enabled: true
+    type: public
+    tags: []
+    orgs: []
+  subscribe:
+    enabled: true
+    type: authenticated
+    tags: []
+    orgs: []
+apis:
+  oauth-2legged:
+    id: 5872f441e4b02da17f54b129
+  banking:
+    id: 5872f599e4b02da17f54b137
+  oauth-3legged:
+    id: 5872f534e4b02da17f54b132
+plans:
+  default:
+    title: Default Plan
+    description: Default Plan
+    approval: false
+    rate-limit:
+      hard-limit: false
+      value: 100/hour

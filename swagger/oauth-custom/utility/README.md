@@ -14,7 +14,9 @@ Note that this is work in progress, and as time allowed, and more customization 
 ## using authenticate-url generic, /basic-auth-generic   
 See the following for more info:
 http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html
+
 This api returns 200 and non-200 without any HTTP response header.
+
 ```
 ~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth-generic/spoon/spoon' --user spoon:spoon
 *   Trying 9.33.69.166...
@@ -28,8 +30,10 @@ This api returns 200 and non-200 without any HTTP response header.
 ## using authenticate-url, /basic-auth
 See the following for more info:
 http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html
+
 This api returns 200 and non-200 without any HTTP response header and
 - api-authenticated-credential
+
 ```
 ~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth/spoon/spoon' --user spoon:spoon
 *   Trying 9.33.69.166...

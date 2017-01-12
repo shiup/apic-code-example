@@ -88,5 +88,10 @@ This api returns 200 and non-200 without any HTTP response header and
 ~/docker/apiconnect-docker/sni-proxy (💃 ) 
 ```
 ## using the 3rd party authentication/authorization oauth redirect
+[This is 2 apis to support the above](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/task_apionprem_redirect_form_.html)
+
+```
+
+
 ```
 ```

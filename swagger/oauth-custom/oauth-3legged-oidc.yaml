@@ -1,3 +1,11 @@
+# implicit grant
+# curl -k -v https://datapower/spoon/sb/oauth-3legged/oauth2/authorize -d 'response_type=token&client_id=e4dfd797-9fd9-49b7-b9db-3dde9d89471c&client_secret=xS3iJ6yT5bU0qJ6wV3aV3jF3nC7oS1vA5dT4aT4iF6tK3vU4hK&scope=checking saving openid&redirect_uri=https://www.getpostman.com/oauth2/callback' --user spoon:spoon
+
+# code
+# curl -k -v 'https://datapower/spoon/sb/oauth-3legged/oauth2/authorize?client_id=e4dfd797-9fd9-49b7-b9db-3dde9d89471c' -d 'response_type=code&redirect_uri=https://www.getpostman.com/oauth2/callback&scope=checking openid&client_secret=xS3iJ6yT5bU0qJ6wV3aV3jF3nC7oS1vA5dT4aT4iF6tK3vU4hK' --user spoon:spoon
+# curl -k -v 'https://datapower/spoon/sb/oauth-3legged/oauth2/token' -d 'grant_type=authorization_code&redirect_uri=https://www.getpostman.com/oauth2/callback&scope=checking%20openid&client_id=e4dfd797-9fd9-49b7-b9db-3dde9d89471c&client_secret=xS3iJ6yT5bU0qJ6wV3aV3jF3nC7oS1vA5dT4aT4iF6tK3vU4hK&code=AALQx100aqhUSoup1uJeILvHPDUCY7LKhMNHPZhyWoEyVbUGY1gZMuxmXqM5zAeL3yoguWL0GEEZYb8aqDE8k-LzUCETYc8dYdao-fBhGwxjZfQNkGsY2Yk5q4cRibSfcW5UfvgyKKBUdiqcbvDg-NM9UgUEV6CTjaQspzLz9m36qPmt8Hwl-moZBVEjZn8kvCH2h7s41eh-qtowKw8IAHP5k192pOkSIP2wLyMnY13B-ZAVMDB0w9dA6D_IMqERQcZlQdDyKxiJYImCBFsuzGH-RrB-vaslva_abJBS8fzod_641lQKCDhC3QwIil0Stdap439MTA-03NvKAKZLMfspqMrv8WHM4fYC9m98gYO6jCh6knkRD9wXu3S599-Sqv0yhdMArVWD-sLsTV-LNxU1Cfira0Bp8mKcZH6cRjbyG7uv2fBFwukPmHtiEXKNsf5As69rxAIJdYA-lEOsrhmU'
+
+
 swagger: '2.0'
 info:
   x-ibm-name: oauth-3legged

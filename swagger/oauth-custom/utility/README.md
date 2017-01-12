@@ -27,8 +27,7 @@ This api returns 200 and non-200 without any HTTP response header.
 ....
 ```
 ## using authenticate-url, /basic-auth
-See the following for more info:
-http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html
+[Support Authenticate URL on IBM APIC](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html).
 
 This api returns 200 and non-200 without any HTTP response header and
 - api-authenticated-credential
@@ -47,8 +46,7 @@ This api returns 200 and non-200 without any HTTP response header and
 
 ```
 ## using authenticate-url, /basic-auth-metadata
-See the following for more info:
-http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html
+[Support Authenticate URL on IBM APIC](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html).
 
 This api returns 200 and non-200 without any HTTP response header and
 - api-authenticated-credential
@@ -69,8 +67,7 @@ This api returns 200 and non-200 without any HTTP response header and
 ...
 ```
 ## using the custom login form
-See the following for more info:
-http://www.ibm.com/support/knowledgecenter/SSFS6T/com.ibm.apic.toolkit.doc/task_apionprem_Create_a_custom_login_form.html
+[Host a Custom Login Form for APIC](http://www.ibm.com/support/knowledgecenter/SSFS6T/com.ibm.apic.toolkit.doc/task_apionprem_Create_a_custom_login_form.html)
 
 ```
 ~/docker/apiconnect-docker/sni-proxy (💃 ) curl -k 'https://datapower/spoon/sb/utility/custom-login-form'

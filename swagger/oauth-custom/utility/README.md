@@ -1,6 +1,7 @@
 # What is this for
 
-This is created to provide a *pseudo backend* to **showcase** how the APIC OAuth customization work.  
+This is created to provide an example *pseudo backend* to **showcase** how the APIC OAuth customization work.  This is not design to be used for production system.  This is provided as-is, on how the features are used.
+
 To use this, 
 - create a product
 - publish the product to your catalog
@@ -91,4 +92,9 @@ This api returns 200 and non-200 without any HTTP response header and
 [This is 2 apis to support 3rd party authentication/authorization](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/task_apionprem_redirect_form_.html)
 
 ```
+The following similates what APIc will issue in a 302 redirect (1/2)
+- curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing'
+The following similates what APIc will issue in the confirming of the username and confirmation code (2/2)
+- curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
+
 ```

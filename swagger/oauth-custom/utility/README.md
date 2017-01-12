@@ -12,8 +12,7 @@ Refer to the comment in the utility.yaml for the function that can be customized
 Note that this is work in progress, and as time allowed, and more customization is created, I will enhance this file.  And feel free to contribute to it too.
 
 ## using authenticate-url generic, /basic-auth-generic   
-See the following for more info:
-http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html
+[Support Authenticate URL on IBM APIC](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html).
 
 This api returns 200 and non-200 without any HTTP response header.
 

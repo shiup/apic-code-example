@@ -77,6 +77,8 @@ This api returns 200 and non-200 without any HTTP response header and
 ~/docker/apiconnect-docker/sni-proxy (💃 )
 ```
 ## using the custom consent/authorization form
+[Host a Custom Authorization (Consent) Form for APIC](http://www.ibm.com/support/knowledgecenter/SSFS6T/com.ibm.apic.toolkit.doc/task_apionprem_create_a_custom_authorization_form.html)
+
 ```
 ~/docker/apiconnect-docker/sni-proxy (💃 ) curl -k -v 'https://datapower/spoon/sb/utility/custom-consent-form'
 ...

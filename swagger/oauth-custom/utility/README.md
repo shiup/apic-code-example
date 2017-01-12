@@ -1,6 +1,6 @@
 # What is this for
 
-This is created to provide a *pseudo backend* to showcase how the OAuth customization work.  
+This is created to provide a *pseudo backend* to *showcase* how the APIC OAuth customization work.  
 To use this, 
 - create a product
 - publish the product to your catalog

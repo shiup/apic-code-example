@@ -1,4 +1,3 @@
-product: 1.0.0
 info:
   name: banking
   title: Banking
@@ -29,3 +28,4 @@ plans:
     rate-limit:
       hard-limit: false
       value: 100/hour
+

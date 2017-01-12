@@ -12,6 +12,9 @@ Refer to the comment in the utility.yaml for the function that can be customized
 Note that this is work in progress, and as time allowed, and more customization is created, I will enhance this file.  And feel free to contribute to it too.
 
 ## using authenticate-url generic, /basic-auth-generic   
+See the following for more info:
+http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html
+This api returns 200 and non-200 without any HTTP response header.
 ```
 ~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth-generic/spoon/spoon' --user spoon:spoon
 *   Trying 9.33.69.166...
@@ -22,7 +25,11 @@ Note that this is work in progress, and as time allowed, and more customization 
 < HTTP/1.1 200 OK
 ....
 ```
-## using authenticate-url, /basic-auth   
+## using authenticate-url, /basic-auth
+See the following for more info:
+http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html
+This api returns 200 and non-200 without any HTTP response header and
+- api-authenticated-credential
 ```
 ~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth/spoon/spoon' --user spoon:spoon
 *   Trying 9.33.69.166...
@@ -37,6 +44,12 @@ Note that this is work in progress, and as time allowed, and more customization 
 
 ```
 ## using authenticate-url, /basic-auth-metadata
+See the following for more info:
+http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html
+This api returns 200 and non-200 without any HTTP response header and
+- api-authenticated-credential
+- API-OAUTH-METADATA-FOR-ACCESSTOKEN
+- API-OAUTH-METADATA-FOR-PAYLOAD
 ```
 ~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth-metadata/spoon/spoon' --user spoon:spoon
 ...
@@ -67,4 +80,7 @@ Note that this is work in progress, and as time allowed, and more customization 
 ...
 <html lang="en" xml:lang="en"><head><title>Request for permission</title></head><body class="customconsent"><div><div><form method="post" enctype="application/x-www-form-urlencoded" action="authorize"><input type="hidden" name="original-url" value="A"/><input type="hidden" name="client_id" value="A"/><AZ-INJECT-HIDDEN-INPUT-FIELDS/><p>Greeting..</p><DISPLAY-RESOURCE-OWNER/><p>This app </p><OAUTH-APPLICATION-NAME/><p> would like to access your data.</p><div><button class="cancel" type="submit" name="approve" value="false">No Thanks</button><button class="submit" type="submit" name="approve" value="true">Allow Access</button></div></form></div><AZ-INTERNAL-CUSTOM-FORM-ERROR/></div></body></html>
 ~/docker/apiconnect-docker/sni-proxy (💃 ) 
+```
+## using the 3rd party authentication/authorization oauth redirect
+```
 ```

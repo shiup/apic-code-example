@@ -89,7 +89,7 @@ This api returns 200 and non-200 without any HTTP response header and
 ~/docker/apiconnect-docker/sni-proxy (💃 ) 
 ```
 ## using the 3rd party authentication/authorization oauth redirect
-[This is 2 apis to support 3rd party authentication/authorization](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/task_apionprem_redirect_form_.html)
+[This are the 2 apis to support 3rd party authentication/authorization](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/task_apionprem_redirect_form_.html)
 
 ```
 The following similates what APIc will issue in a 302 redirect (1/2)

@@ -1,15 +1,19 @@
 ## OAuth providers
-This provider shows how the custom support works in OAuth for IBM APIC.
+This provider, oauth-3legged.yaml, shows how the custom support works in OAuth for IBM APIC.
+
+This provider, oauth-redirect.yaml, shows how the *extract identity redirect* works.
 
 If you are going to import this provider yaml into BlueMix Public, make sure you disable the 'Enable revocation', [see this for more info.](http://www.ibm.com/support/knowledgecenter/en/SSFS6T/com.ibm.apic.toolkit.doc/tapim_sec_api_config_scheme_oauth_endpoint.html)
 
-This provider shows :
-- host a custom login page on a 3rd party
-- how to use authenticate url, and return an authenticated credential for the authenticated user..
+This provider, oauth-3legged.yaml shows :
+- [host a custom login page on a 3rd party](http://www.ibm.com/support/knowledgecenter/SSFS6T/com.ibm.apic.toolkit.doc/task_apionprem_Create_a_custom_login_form.html)
+- [how to use authenticate url](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html), and return an authenticated credential for the authenticated user..
   - for example :
     - user : **spoon**, with password : password
     - after authenticated successfully, customer would like to use **cn=spoon,email=spoon@poon.com** as the user credential, instead of **spoon**.
-- host a custom authorization/consent form
+- [host a custom authorization/consent form](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/task_apionprem_create_a_custom_authorization_form.html)
+
+This provider, oauth-redirect.yaml, shows how the [3rd party redirect](http://www.ibm.com/support/knowledgecenter/en/SSFS6T/com.ibm.apic.toolkit.doc/task_apionprem_redirect_form_.html) work.
 
 ### step 0.
 Make sure you have stage the utility product that will be used by this exercise to support the

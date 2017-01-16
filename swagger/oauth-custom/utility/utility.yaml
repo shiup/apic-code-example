@@ -14,6 +14,7 @@
 #   6. Add the 'identity extraction' -> 'redirect' support
 #      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing'
 #      2/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
+
 swagger: '2.0'
 info:
   x-ibm-name: utility
@@ -100,6 +101,7 @@ x-ibm-configuration:
                       payload.data = 'custom data whatever you want to add here';
                       apic.setvariable('message.headers.api-oauth-metadata-for-accesstoken', JSON.stringify(payload));
                       payload.for = 'access token payload';
+                      payload['id-for-oidc'] = 'cn=' + apic.getvariable('request.parameters.username') + ',o=spoonOrg';
                       apic.setvariable('message.headers.api-oauth-metadata-for-payload', JSON.stringify(payload));
             - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-login-form'))"
               execute:
@@ -184,14 +186,12 @@ x-ibm-configuration:
                     version: 1.0.0
                     source: |
                       var hash = require('crypto').createHash('sha256');
-                      var username = 'spoon-' + apim.getvariable('request.parameters.app-name');
+                      var params = apim.getvariable('request.parameters');
+                      var username = 'spoon-' + params['app-name'];
                       var confirmationCode = hash.update(username).digest('base64');
-                      var origUrl = apim.getvariable('request.parameters.original-url');
-                      apim.setvariable('message.headers.orig-url', origUrl);
-                      apim.setvariable('message.headers.username', username);
-                      apim.setvariable('message.headers.confcode', confirmationCode);
-                      var location = origUrl + '&username=' + username + '&confirmation-code=' + confirmationCode;
-                       apim.setvariable('message.status.code', 302);
+                      var origUrl = decodeURIComponent(params['original-url'] || '');
+                      var location = origUrl + '&username=' + username + '&confirmation=' + confirmationCode;
+                      apim.setvariable('message.status.code', 302);
                        apim.setvariable('message.headers.location', location);
             - otherwise:
                 - gatewayscript:
@@ -219,6 +219,10 @@ paths:
         required: true
         in: query
       - name: app-name
+        type: string
+        required: true
+        in: query
+      - name: rstate
         type: string
         required: true
         in: query
@@ -277,7 +281,4 @@ parameters:
     required: true
     in: path
     description: Password
-
-
-
 

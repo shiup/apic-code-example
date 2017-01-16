@@ -13,9 +13,9 @@ This provider shows :
 
 ### step 0.
 Make sure you have stage the utility product that will be used by this exercise to support the
-1. custom user login form
-2. authenticate url
-3. custom authorization/consent form
+1. [custom user login form](http://www.ibm.com/support/knowledgecenter/SSFS6T/com.ibm.apic.toolkit.doc/task_apionprem_Create_a_custom_login_form.html)
+2. [authenticate url](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html)
+3. [custom authorization/consent form](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/task_apionprem_create_a_custom_authorization_form.html)
 
 ### step 1.
 Create a product to include the oauth provider yaml, and the banking.yaml in the parent directory. The **apis** section of your product.yaml should look similar to this.  [Make sure you stage/publish the product.](https://www.ibm.com/support/knowledgecenter/en/SSFS6T/com.ibm.apic.toolkit.doc/capim_products.html)

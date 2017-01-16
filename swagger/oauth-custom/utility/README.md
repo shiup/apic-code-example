@@ -2,7 +2,7 @@
 
 This is created to provide an example *pseudo backend* to **showcase** how the APIC OAuth customization work.  This is not design to be used for production system.  This is provided as-is, on how the features are used.
 
-To use this, 
+To use this,
 - create a product
 - publish the product to your catalog
 
@@ -12,10 +12,13 @@ Refer to the comment in the utility.yaml for the function that can be customized
 
 Note that this is work in progress, and as time allowed, and more customization is created, I will enhance this file.  And feel free to contribute to it too.
 
-## using authenticate-url generic, /basic-auth-generic   
+## using authenticate-url generic, /basic-auth-generic/{username}/{password}   
 [Support Authenticate URL on IBM APIC](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html).
 
-This api returns 200 and non-200 without any HTTP response header.
+This api :
+- returns 200 if {username} and {password} match what is passed in as HTTP Basic Authorization Header
+  - this does not return any HTTP response header
+- return non-200 if the above check fails
 
 ```
 ~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth-generic/spoon/spoon' --user spoon:spoon
@@ -23,15 +26,17 @@ This api returns 200 and non-200 without any HTTP response header.
 ...
 * TLS 1.2 connection using TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
 ...
-> 
+>
 < HTTP/1.1 200 OK
 ....
 ```
-## using authenticate-url, /basic-auth
+## using authenticate-url, /basic-auth/{username}/{password}
 [Support Authenticate URL on IBM APIC](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html).
 
-This api returns 200 and non-200 without any HTTP response header and
-- api-authenticated-credential
+This api :
+- returns 200 if {username} and {password} match what is passed in as HTTP Basic Authorization Header
+  - this returns **api-authenticated-credential** HTTP response header
+- return non-200 if the above check fails
 
 ```
 ~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth/spoon/spoon' --user spoon:spoon
@@ -39,27 +44,31 @@ This api returns 200 and non-200 without any HTTP response header and
 ...
 * TLS 1.2 connection using TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
 ...
-> 
+>
 < HTTP/1.1 200 OK
 ....
 < api-authenticated-credential: cn=spoon,email=spoon@poon.com
 ....
 
 ```
-## using authenticate-url, /basic-auth-metadata
+## using authenticate-url, /basic-auth-metadata/{username}/{password}
 [Support Authenticate URL on IBM APIC](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html).
 
-This api returns 200 and non-200 without any HTTP response header and
-- api-authenticated-credential
-- API-OAUTH-METADATA-FOR-ACCESSTOKEN
-- API-OAUTH-METADATA-FOR-PAYLOAD
+This api :
+- returns 200 if {username} and {password} match what is passed in as HTTP Basic Authorization Header
+  - this returns the following HTTP response header
+    - api-authenticated-credential
+    - api-oauth-metadata-for-accesstoken
+    - api-oauth-metadata-for-payload
+- return non-200 if the above check fails
+
 ```
 ~/apim/datapower/xsl (💃 ) curl -v -k -v 'https://datapower/poon/sb/consent/basic-auth-metadata/spoon/spoon' --user spoon:spoon
 ...
 * Server auth using Basic with user 'spoon'
 > GET /poon/sb/consent/basic-auth-metadata/spoon/spoon HTTP/1.1
 ...
-> 
+>
 < HTTP/1.1 200 OK
 ...
 < api-authenticated-credential: cn=spoon,email=spoon@poon.com
@@ -86,7 +95,7 @@ This api returns 200 and non-200 without any HTTP response header and
 < HTTP/1.1 200 OK
 ...
 <html lang="en" xml:lang="en"><head><title>Request for permission</title></head><body class="customconsent"><div><div><form method="post" enctype="application/x-www-form-urlencoded" action="authorize"><input type="hidden" name="original-url" value="A"/><input type="hidden" name="client_id" value="A"/><AZ-INJECT-HIDDEN-INPUT-FIELDS/><p>Greeting..</p><DISPLAY-RESOURCE-OWNER/><p>This app </p><OAUTH-APPLICATION-NAME/><p> would like to access your data.</p><div><button class="cancel" type="submit" name="approve" value="false">No Thanks</button><button class="submit" type="submit" name="approve" value="true">Allow Access</button></div></form></div><AZ-INTERNAL-CUSTOM-FORM-ERROR/></div></body></html>
-~/docker/apiconnect-docker/sni-proxy (💃 ) 
+~/docker/apiconnect-docker/sni-proxy (💃 )
 ```
 ## using the 3rd party authentication/authorization oauth redirect
 [This are the 2 apis to support 3rd party authentication/authorization](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/task_apionprem_redirect_form_.html)

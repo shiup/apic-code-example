@@ -14,6 +14,7 @@
 #   6. Add the 'identity extraction' -> 'redirect' support
 #      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing'
 #      2/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
+#   7.  curl -k -v 'https://datapower/spoon/sb/utility/responsecode/404
 
 swagger: '2.0'
 info:
@@ -193,6 +194,14 @@ x-ibm-configuration:
                       var location = origUrl + '&username=' + username + '&confirmation=' + confirmationCode;
                       apim.setvariable('message.status.code', 302);
                        apim.setvariable('message.headers.location', location);
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/responsecode/{responsecode}'))"
+              execute:
+                - set-variable:
+                    title: set-variable
+                    actions:
+                      - set: message.status.code
+                        value: $(request.parameters.responsecode)
+                    version: 1.0.0
             - otherwise:
                 - gatewayscript:
                     title: gatewayscript
@@ -201,6 +210,13 @@ x-ibm-configuration:
           version: 1.0.0
   phase: realized
 paths:
+  '/responsecode/{responsecode}':
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - $ref: '#/parameters/responsecode'
   /third-party-authenticate/authenticate:
     get:
       responses:
@@ -281,4 +297,10 @@ parameters:
     required: true
     in: path
     description: Password
+  responsecode:
+    name: responsecode
+    type: string
+    required: true
+    in: path
+    description: http response code to send back
 

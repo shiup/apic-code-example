@@ -15,6 +15,7 @@
 #      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing'
 #      2/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
 #   7.  curl -k -v 'https://datapower/spoon/sb/utility/responsecode/404
+#   8.  curl -k -v https://datapower/spoon/sb/utility/ping
 
 swagger: '2.0'
 info:
@@ -29,12 +30,7 @@ consumes:
   - application/json
 produces:
   - application/json
-securityDefinitions:
-  basic-1:
-    type: basic
-    description: For End User authentication
-security:
-  - {}
+securityDefinitions: {}
 x-ibm-configuration:
   testable: true
   enforced: true
@@ -96,14 +92,8 @@ x-ibm-configuration:
                     version: 1.0.0
                     source: |-
                       var apic = require('./apim.custom.js');
-                      var payload = {};
-                      payload.for = 'http header';
-                      payload.username = apic.getvariable('request.parameters.username');
-                      payload.data = 'custom data whatever you want to add here';
-                      apic.setvariable('message.headers.api-oauth-metadata-for-accesstoken', JSON.stringify(payload));
-                      payload.for = 'access token payload';
-                      payload['id-for-oidc'] = 'cn=' + apic.getvariable('request.parameters.username') + ',o=spoonOrg';
-                      apic.setvariable('message.headers.api-oauth-metadata-for-payload', JSON.stringify(payload));
+                      apic.setvariable('message.headers.api-oauth-metadata-for-accesstoken', 'custom metadata for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
+                      apic.setvariable('message.headers.api-oauth-metadata-for-payload', 'custom payload data for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
             - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-login-form'))"
               execute:
                 - gatewayscript:
@@ -174,33 +164,13 @@ x-ibm-configuration:
                       else {
                           apic.setvariable('message.status.code', 401);
                       }
-            - condition: "((request.verb==='GET')&&(api.operation.path==='/third-party-authenticate/authenticate'))"
-              execute:
-                - gatewayscript:
-                    title: Third Party Authenticator (2/2)
-                    version: 1.0.0
-                    source: "var hash = require('crypto').createHash('sha256');\n\nvar reqauth = apim.getvariable('request.authorization').split(' ');\nvar splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');\nvar username = splitval[0] || '';\nvar password = splitval[1] || '';\n\nif (hash.update(username).digest('base64') === password)\n    apim.setvariable('message.status.code', 200);\nelse\n    apim.setvariable('message.status.code', 401); \n"
-            - condition: "((request.verb==='GET')&&(api.operation.path==='/third-party-authenticate'))"
-              execute:
-                - gatewayscript:
-                    title: Third Party Authenticator (1/2)
-                    version: 1.0.0
-                    source: |
-                      var hash = require('crypto').createHash('sha256');
-                      var params = apim.getvariable('request.parameters');
-                      var username = 'spoon-' + params['app-name'];
-                      var confirmationCode = hash.update(username).digest('base64');
-                      var origUrl = decodeURIComponent(params['original-url'] || '');
-                      var location = origUrl + '&username=' + username + '&confirmation=' + confirmationCode;
-                      apim.setvariable('message.status.code', 302);
-                       apim.setvariable('message.headers.location', location);
-            - condition: "((request.verb==='GET')&&(api.operation.path==='/responsecode/{responsecode}'))"
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/ping'))"
               execute:
                 - set-variable:
                     title: set-variable
                     actions:
                       - set: message.status.code
-                        value: $(request.parameters.responsecode)
+                        value: '200'
                     version: 1.0.0
             - otherwise:
                 - gatewayscript:
@@ -210,45 +180,16 @@ x-ibm-configuration:
           version: 1.0.0
   phase: realized
 paths:
-  '/responsecode/{responsecode}':
+  /ping:
     get:
       responses:
         '200':
           description: 200 OK
-    parameters:
-      - $ref: '#/parameters/responsecode'
-  /third-party-authenticate/authenticate:
-    get:
-      responses:
-        '200':
-          description: 200 OK
-      security:
-        - basic-1: []
-  /third-party-authenticate:
-    get:
-      responses:
-        '200':
-          description: 200 OK
-    parameters:
-      - name: original-url
-        type: string
-        required: true
-        in: query
-      - name: app-name
-        type: string
-        required: true
-        in: query
-      - name: rstate
-        type: string
-        required: true
-        in: query
   '/basic-auth-generic/{username}/{password}':
     get:
       responses:
         '200':
           description: 200 OK
-      security:
-        - basic-1: []
     parameters:
       - $ref: '#/parameters/username'
       - $ref: '#/parameters/password'
@@ -267,8 +208,6 @@ paths:
       responses:
         '200':
           description: 200 OK
-      security:
-        - basic-1: []
     parameters:
       - $ref: '#/parameters/username'
       - $ref: '#/parameters/password'
@@ -277,8 +216,6 @@ paths:
       responses:
         '200':
           description: 200 OK
-      security:
-        - basic-1: []
     parameters:
       - $ref: '#/parameters/username'
       - $ref: '#/parameters/password'
@@ -297,10 +234,4 @@ parameters:
     required: true
     in: path
     description: Password
-  responsecode:
-    name: responsecode
-    type: string
-    required: true
-    in: path
-    description: http response code to send back
 

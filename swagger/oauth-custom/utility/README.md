@@ -119,3 +119,10 @@ The following similates what APIc will issue in the confirming of the username a
 - curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
 
 ```
+
+## using a ping service (possibily for health check with load balancer)
+
+```
+The following similates what APIc will return http 200 response code
+- curl -k -v https://datapower/spoon/sb/utility/ping
+```

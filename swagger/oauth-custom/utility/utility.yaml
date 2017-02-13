@@ -16,26 +16,25 @@
 #      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing&failed=0' <- for a succesful auth
 #      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing&failed=1' <- for a failed auth
 #      2/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
----
-swagger: "2.0"
+#   7.  curl -k -v 'https://datapower/spoon/sb/utility/responsecode/404
+#   8.  curl -k -v https://datapower/spoon/sb/utility/ping
+swagger: '2.0'
 info:
-  x-ibm-name: "utility"
-  title: "utility"
-  version: "1.0.0"
+  x-ibm-name: utility
+  title: utility
+  version: 1.0.2
 schemes:
-- "https"
-host: "$(catalog.host)"
-basePath: "/utility"
+  - https
+host: $(catalog.host)
+basePath: /utility
 consumes:
-- "application/json"
+  - application/json
 produces:
-- "application/json"
+  - application/json
 securityDefinitions:
   basic-1:
-    type: "basic"
-    description: "For End User authentication"
-security:
-- {}
+    type: basic
+    description: ''
 x-ibm-configuration:
   testable: true
   enforced: true
@@ -43,248 +42,254 @@ x-ibm-configuration:
     enabled: true
   assembly:
     execute:
-    - switch:
-        title: "switch"
-        case:
-        - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth/{username}/{password}'))"
-          execute:
-          - gatewayscript:
-              title: "Authenticate"
-              version: "1.0.0"
-              description: "Create Authentication URL"
-              source: "// author : @spoon or @shiup\nvar apic = require('./apim.custom.js');\n\
-                apic.output('application/json');\nvar reqauth = apic.getvariable('request.authorization').split('\
-                \ ');\nvar splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');\n\
-                var username = splitval[0] || '';\nvar password = splitval[1] || '';\n\
-                apic.console.debug('user credential : [' + username + ':' + password\
-                \ + ']');\nif (username === apic.getvariable('request.parameters.username')\
-                \ && password === apic.getvariable('request.parameters.password'))\
-                \ {\n    session.output.write({\"authenticatedUser\":username});\n\
-                \    apic.setvariable('message.headers.api-authenticated-credential',\
-                \ 'cn=' + username + ',email=' + username + '@poon.com');\n    apic.setvariable('message.status.code',\
-                \ 200)\n}\nelse {\n    apic.setvariable('message.status.code', 401);\n\
-                }\n"
-        - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-metadata/{username}/{password}'))"
-          execute:
-          - gatewayscript:
-              title: "Authenticate"
-              version: "1.0.0"
-              description: "Create Authentication URL"
-              source: "// author : @spoon or @shiup\nvar apic = require('./apim.custom.js');\n\
-                apic.output('application/json');\nvar reqauth = apic.getvariable('request.authorization').split('\
-                \ ');\nvar splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');\n\
-                var username = splitval[0] || '';\nvar password = splitval[1] || '';\n\
-                apic.console.debug('user credential : [' + username + ':' + password\
-                \ + ']');\nif (username === apic.getvariable('request.parameters.username')\
-                \ && password === apic.getvariable('request.parameters.password'))\
-                \ {\n    session.output.write({\"authenticatedUser\":username});\n\
-                \    apic.setvariable('message.headers.api-authenticated-credential',\
-                \ 'cn=' + username + ',email=' + username + '@poon.com');\n    apic.setvariable('message.status.code',\
-                \ 200)\n}\nelse {\n    apic.setvariable('message.status.code', 401);\n\
-                }\n"
-          - gatewayscript:
-              title: "SetMetaData"
-              version: "1.0.0"
-              source: "var apic = require('./apim.custom.js');\nvar payload = {};\n\
-                payload.for = 'http header';\npayload.username = apic.getvariable('request.parameters.username');\n\
-                payload.data = 'custom data whatever you want to add here';\napic.setvariable('message.headers.api-oauth-metadata-for-accesstoken',\
-                \ JSON.stringify(payload));\npayload.for = 'access token payload';\n\
-                payload['id-for-oidc'] = 'cn=' + apic.getvariable('request.parameters.username')\
-                \ + ',o=spoonOrg';\napic.setvariable('message.headers.api-oauth-metadata-for-payload',\
-                \ JSON.stringify(payload));"
-        - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-login-form'))"
-          execute:
-          - gatewayscript:
-              title: "create-custom-login-form"
-              version: "1.0.0"
-              source: "// @spoon\nvar form = '<html lang=\"en\" xml:lang=\"en\">'\
-                \ +\n  '<head><meta http-equiv=\"Content-Type\" content=\"text/html;\
-                \ charset=UTF-8\"/>Spoon Company</head>' +\n  '<body>' +\n  '<form\
-                \ method=\"POST\" enctype=\"application/x-www-form-urlencoded\" action=\"\
-                authorize\">' + \n  '<h1>Please sign in</h1>' +\n  '<p>Username </p>'\
-                \ +\n  '<p style=\"text-indent: 0em;\"><input type=\"text\" name=\"\
-                username\" required=\"required\"/></p>' +\n  '<p>Password </p>' +\n\
-                \  '<p style=\"text-indent: 0em;\"><input type=\"password\" name=\"\
-                password\" required=\"required\"/></p>' +\n  '<EI-INJECT-HIDDEN-INPUT-FIELDS/>'\
-                \ +\n  '<p style=\"text-indent: 2em;\"> <button id=\"login_button\"\
-                \ type=\"submit\" name=\"login\" value=\"true\">Log in</button> </p>'\
-                \ +\n  '<EI-LOGINFIRSTTIME><p>If you have forgotten your user name\
-                \ or password, contact your system administrator.</p></EI-LOGINFIRSTTIME>'\
-                \ +\n  '<EI-LOGINFAILED><p style=\"color: red\">At least one of your\
-                \ entries does not match our records. ' +\n  'If you have forgotten\
-                \ your user name or password, contact your system administrator.</p></EI-LOGINFAILED>'\
-                \ +\n  '<EI-INTERNAL-CUSTOM-FORM-ERROR/>' +\n  '</form></body></html>';\n\
-                \  session.output.write(form);\n  apim.output('text/html');\n  apim.setvariable('message.status.code',\
-                \ 200);"
-        - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-consent-form'))"
-          execute:
-          - gatewayscript:
-              title: "create-custom-consent-form"
-              version: "1.0.0"
-              source: "var formPost5060 = '<html lang=\"en\" xml:lang=\"en\">' +\n\
-                \  '<head><title>Request for permission</title></head>' +\n  '<body\
-                \ class=\"customconsent\"><div><div>' +\n  '<form method=\"post\"\
-                \ enctype=\"application/x-www-form-urlencoded\" action=\"authorize\"\
-                >' +\n  '<AZ-INJECT-HIDDEN-INPUT-FIELDS/>' +\n  '<p>Greeting..</p><DISPLAY-RESOURCE-OWNER/>'\
-                \ +\n  '<p>This app </p><OAUTH-APPLICATION-NAME/><p> would like to\
-                \ access your data.</p>' +\n  '<div>' +\n  '<button class=\"cancel\"\
-                \ type=\"submit\" name=\"approve\" value=\"false\">No Thanks</button>'\
-                \ +\n  '<button class=\"submit\" type=\"submit\" name=\"approve\"\
-                \ value=\"true\">Allow Access</button>' +\n  '</div></form></div>'\
-                \ +\n  '<AZ-INTERNAL-CUSTOM-FORM-ERROR/>' +\n  '</div></body></html>';\n\
-                session.output.write(formPost5060);\n/*\n**************************\n\
-                however there is a known issue with this support, that will be fixed\
-                \ in future, post 5060 release.  So for now, use the following instead\n\
-                ***************************\n*/\nvar formUpTo5060 = '<html lang=\"\
-                en\" xml:lang=\"en\">' +\n  '<head><title>Request for permission</title></head>'\
-                \ +\n  '<body class=\"customconsent\"><div><div>' +\n  '<form method=\"\
-                post\" enctype=\"application/x-www-form-urlencoded\" action=\"authorize\"\
-                >' +\n  '<input type=\"hidden\" name=\"original-url\" value=\"A\"\
-                />' +\n  '<input type=\"hidden\" name=\"client_id\" value=\"A\"/>'\
-                \ +\n  '<AZ-INJECT-HIDDEN-INPUT-FIELDS/>' +\n  '<p>Greeting..</p><DISPLAY-RESOURCE-OWNER/>'\
-                \ +\n  '<p>This app </p><OAUTH-APPLICATION-NAME/><p> would like to\
-                \ access your data.</p>' +\n  '<div>' +\n  '<button class=\"cancel\"\
-                \ type=\"submit\" name=\"approve\" value=\"false\">No Thanks</button>'\
-                \ +\n  '<button class=\"submit\" type=\"submit\" name=\"approve\"\
-                \ value=\"true\">Allow Access</button>' +\n  '</div></form></div>'\
-                \ +\n  '<AZ-INTERNAL-CUSTOM-FORM-ERROR/>' +\n  '</div></body></html>';\n\
-                session.output.write(formUpTo5060);\napim.output('text/html');\napim.setvariable('message.status.code',\
-                \ 200);\n"
-        - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-generic/{username}/{password}'))"
-          execute:
-          - gatewayscript:
-              title: "Generice authenticate-url response"
-              version: "1.0.0"
-              source: "// author : @spoon or @shiup\nvar apic = require('./apim.custom.js');\n\
-                apic.output('application/json');\nvar reqauth = apic.getvariable('request.authorization').split('\
-                \ ');\nvar splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');\n\
-                var username = splitval[0] || '';\nvar password = splitval[1] || '';\n\
-                apic.console.debug('user credential : [' + username + ':' + password\
-                \ + ']');\nif (username === apic.getvariable('request.parameters.username')\
-                \ && password === apic.getvariable('request.parameters.password'))\
-                \ {\n    session.output.write({\"authenticatedUser\":username});\n\
-                \    apic.setvariable('message.status.code', 200)\n}\nelse {\n   \
-                \ apic.setvariable('message.status.code', 401);\n}\n"
-        - condition: "((request.verb==='GET')&&(api.operation.path==='/third-party-authenticate/authenticate'))"
-          execute:
-          - gatewayscript:
-              title: "Third Party Authenticator (2/2)"
-              version: "1.0.0"
-              source: "var hash = require('crypto').createHash('sha256');\n\nvar reqauth\
-                \ = apim.getvariable('request.authorization').split(' ');\nvar splitval\
-                \ = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');\n\
-                var username = splitval[0] || '';\nvar password = splitval[1] || '';\n\
-                \nif (hash.update(username).digest('base64') === password)\n    apim.setvariable('message.status.code',\
-                \ 200);\nelse\n    apim.setvariable('message.status.code', 401); \n"
-        - condition: "((request.verb==='GET')&&(api.operation.path==='/third-party-authenticate'))"
-          execute:
-          - gatewayscript:
-              title: "Third Party Authenticator (1/2)"
-              version: "1.0.0"
-              source: "var hash = require('crypto').createHash('sha256');\nvar params\
-                \ = apim.getvariable('request.parameters');\nvar username = 'spoon-'\
-                \ + params['app-name'];\nvar confirmationCode = hash.update(username).digest('base64');\n\
-                var failed = params['failed']\nvar origUrl = decodeURIComponent(params['original-url']\
-                \ || '');\nif (typeof failed !== 'undefined' && failed != 0)\n   \
-                \ var location = origUrl + '&username=' + username + '&error=error_flag_not_0';\n\
-                else\n    var location = origUrl + '&username=' + username + '&confirmation='\
-                \ + confirmationCode;\napim.setvariable('message.status.code', 302);\n\
-                \ apim.setvariable('message.headers.location', location);\n"
-        - otherwise:
-          - gatewayscript:
-              title: "gatewayscript"
-              version: "1.0.0"
-              source: "require('./apim.custom.js').setvariable('message.status.code',\
-                \ 500);"
-        version: "1.0.0"
-  phase: "realized"
+      - switch:
+          title: switch
+          case:
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth/{username}/{password}'))"
+              execute:
+                - gatewayscript:
+                    title: Authenticate
+                    version: 1.0.0
+                    description: Create Authentication URL
+                    source: |
+                      // author : @spoon or @shiup
+                      var apic = require('./apim.custom.js');
+                      apic.output('application/json');
+                      var reqauth = apic.getvariable('request.authorization').split(' ');
+                      var splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');
+                      var username = splitval[0] || '';
+                      var password = splitval[1] || '';
+                      apic.console.debug('user credential : [' + username + ':' + password + ']');
+                      if (username === apic.getvariable('request.parameters.username') && password === apic.getvariable('request.parameters.password')) {
+                          session.output.write({"authenticatedUser":username});
+                          apic.setvariable('message.headers.api-authenticated-credential', 'cn=' + username + ',email=' + username + '@poon.com');
+                          apic.setvariable('message.status.code', 200)
+                      }
+                      else {
+                          apic.setvariable('message.status.code', 401);
+                      }
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-metadata/{username}/{password}'))"
+              execute:
+                - gatewayscript:
+                    title: Authenticate
+                    version: 1.0.0
+                    description: Create Authentication URL
+                    source: |
+                      // author : @spoon or @shiup
+                      var apic = require('./apim.custom.js');
+                      apic.output('application/json');
+                      var reqauth = apic.getvariable('request.authorization').split(' ');
+                      var splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');
+                      var username = splitval[0] || '';
+                      var password = splitval[1] || '';
+                      apic.console.debug('user credential : [' + username + ':' + password + ']');
+                      if (username === apic.getvariable('request.parameters.username') && password === apic.getvariable('request.parameters.password')) {
+                          session.output.write({"authenticatedUser":username});
+                          apic.setvariable('message.headers.api-authenticated-credential', 'cn=' + username + ',email=' + username + '@poon.com');
+                          apic.setvariable('message.status.code', 200)
+                      }
+                      else {
+                          apic.setvariable('message.status.code', 401);
+                      }
+                - gatewayscript:
+                    title: SetMetaData
+                    version: 1.0.0
+                    source: |-
+                      var apic = require('./apim.custom.js');
+                      apic.setvariable('message.headers.api-oauth-metadata-for-accesstoken', 'custom metadata for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
+                      apic.setvariable('message.headers.api-oauth-metadata-for-payload', 'custom payload data for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-login-form'))"
+              execute:
+                - gatewayscript:
+                    title: create-custom-login-form
+                    version: 1.0.0
+                    source: "// @spoon\nvar form = '<html lang=\"en\" xml:lang=\"en\">' +\n  '<head><meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\"/>Spoon Company</head>' +\n  '<body>' +\n  '<form method=\"POST\" enctype=\"application/x-www-form-urlencoded\" action=\"authorize\">' + \n  '<h1>Please sign in</h1>' +\n  '<p>Username </p>' +\n  '<p style=\"text-indent: 0em;\"><input type=\"text\" name=\"username\" required=\"required\"/></p>' +\n  '<p>Password </p>' +\n  '<p style=\"text-indent: 0em;\"><input type=\"password\" name=\"password\" required=\"required\"/></p>' +\n  '<EI-INJECT-HIDDEN-INPUT-FIELDS/>' +\n  '<p style=\"text-indent: 2em;\"> <button id=\"login_button\" type=\"submit\" name=\"login\" value=\"true\">Log in</button> </p>' +\n  '<EI-LOGINFIRSTTIME><p>If you have forgotten your user name or password, contact your system administrator.</p></EI-LOGINFIRSTTIME>' +\n  '<EI-LOGINFAILED><p style=\"color: red\">At least one of your entries does not match our records. ' +\n  'If you have forgotten your user name or password, contact your system administrator.</p></EI-LOGINFAILED>' +\n  '<EI-INTERNAL-CUSTOM-FORM-ERROR/>' +\n  '</form></body></html>';\n  session.output.write(form);\n  apim.output('text/html');\n  apim.setvariable('message.status.code', 200);"
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-consent-form'))"
+              execute:
+                - gatewayscript:
+                    title: create-custom-consent-form
+                    version: 1.0.0
+                    source: |
+                      var formPost5060 = '<html lang="en" xml:lang="en">' +
+                        '<head><title>Request for permission</title></head>' +
+                        '<body class="customconsent"><div><div>' +
+                        '<form method="post" enctype="application/x-www-form-urlencoded" action="authorize">' +
+                        '<AZ-INJECT-HIDDEN-INPUT-FIELDS/>' +
+                        '<p>Greeting..</p><DISPLAY-RESOURCE-OWNER/>' +
+                        '<p>This app </p><OAUTH-APPLICATION-NAME/><p> would like to access your data.</p>' +
+                        '<div>' +
+                        '<button class="cancel" type="submit" name="approve" value="false">No Thanks</button>' +
+                        '<button class="submit" type="submit" name="approve" value="true">Allow Access</button>' +
+                        '</div></form></div>' +
+                        '<AZ-INTERNAL-CUSTOM-FORM-ERROR/>' +
+                        '</div></body></html>';
+                      session.output.write(formPost5060);
+                      /*
+                      **************************
+                      however there is a known issue with this support, that will be fixed in future, post 5060 release.  So for now, use the following instead
+                      ***************************
+                      */
+                      var formUpTo5060 = '<html lang="en" xml:lang="en">' +
+                        '<head><title>Request for permission</title></head>' +
+                        '<body class="customconsent"><div><div>' +
+                        '<form method="post" enctype="application/x-www-form-urlencoded" action="authorize">' +
+                        '<input type="hidden" name="original-url" value="A"/>' +
+                        '<input type="hidden" name="client_id" value="A"/>' +
+                        '<AZ-INJECT-HIDDEN-INPUT-FIELDS/>' +
+                        '<p>Greeting..</p><DISPLAY-RESOURCE-OWNER/>' +
+                        '<p>This app </p><OAUTH-APPLICATION-NAME/><p> would like to access your data.</p>' +
+                        '<div>' +
+                        '<button class="cancel" type="submit" name="approve" value="false">No Thanks</button>' +
+                        '<button class="submit" type="submit" name="approve" value="true">Allow Access</button>' +
+                        '</div></form></div>' +
+                        '<AZ-INTERNAL-CUSTOM-FORM-ERROR/>' +
+                        '</div></body></html>';
+                      session.output.write(formUpTo5060);
+                      apim.output('text/html');
+                      apim.setvariable('message.status.code', 200);
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/basic-auth-generic/{username}/{password}'))"
+              execute:
+                - gatewayscript:
+                    title: Generice authenticate-url response
+                    version: 1.0.0
+                    source: |
+                      // author : @spoon or @shiup
+                      var apic = require('./apim.custom.js');
+                      apic.output('application/json');
+                      var reqauth = apic.getvariable('request.authorization').split(' ');
+                      var splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');
+                      var username = splitval[0] || '';
+                      var password = splitval[1] || '';
+                      apic.console.debug('user credential : [' + username + ':' + password + ']');
+                      if (username === apic.getvariable('request.parameters.username') && password === apic.getvariable('request.parameters.password')) {
+                          session.output.write({"authenticatedUser":username});
+                          apic.setvariable('message.status.code', 200)
+                      }
+                      else {
+                          apic.setvariable('message.status.code', 401);
+                      }
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/third-party-authenticate/authenticate'))"
+              execute:
+                - gatewayscript:
+                    title: Third Party Authenticator (2/2)
+                    version: 1.0.0
+                    source: "var hash = require('crypto').createHash('sha256');\n\nvar reqauth = apim.getvariable('request.authorization').split(' ');\nvar splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');\nvar username = splitval[0] || '';\nvar password = splitval[1] || '';\n\nif (hash.update(username).digest('base64') === password)\n    apim.setvariable('message.status.code', 200);\nelse\n    apim.setvariable('message.status.code', 401); \n"
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/third-party-authenticate'))"
+              execute:
+                - gatewayscript:
+                    title: Third Party Authenticator (1/2)
+                    version: 1.0.0
+                    source: |
+                      var hash = require('crypto').createHash('sha256');
+                      var params = apim.getvariable('request.parameters');
+                      var username = 'spoon-' + params['app-name'];
+                      var confirmationCode = hash.update(username).digest('base64');
+                      var failed = params['failed']
+                      var origUrl = decodeURIComponent(params['original-url'] || '');
+                      if (typeof failed !== 'undefined' && failed != 0)
+                          var location = origUrl + '&username=' + username + '&error=error_flag_not_0';
+                      else
+                          var location = origUrl + '&username=' + username + '&confirmation=' + confirmationCode;
+                      apim.setvariable('message.status.code', 302);
+                       apim.setvariable('message.headers.location', location);
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/ping'))"
+              execute:
+                - set-variable:
+                    title: set-variable
+                    actions:
+                      - set: message.status.code
+                        value: '200'
+                    version: 1.0.0
+            - otherwise:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: "require('./apim.custom.js').setvariable('message.status.code', 500);"
+          version: 1.0.0
+  phase: realized
 paths:
   /third-party-authenticate/authenticate:
     get:
       responses:
-        200:
-          description: "200 OK"
+        '200':
+          description: 200 OK
       security:
-      - basic-1: []
+        - basic-1: []
   /third-party-authenticate:
     get:
       responses:
-        200:
-          description: "200 OK"
+        '200':
+          description: 200 OK
     parameters:
-    - name: "original-url"
-      type: "string"
-      required: true
-      in: "query"
-    - name: "app-name"
-      type: "string"
-      required: true
-      in: "query"
-    - name: "rstate"
-      type: "string"
-      required: true
-      in: "query"
-    - name: "failed"
-      type: "integer"
-      required: false
-      in: "query"
-      format: "int32"
-  /basic-auth-generic/{username}/{password}:
+      - name: original-url
+        type: string
+        required: true
+        in: query
+      - name: app-name
+        type: string
+        required: true
+        in: query
+      - name: rstate
+        type: string
+        required: true
+        in: query
+      - name: failed
+        type: integer
+        required: false
+        in: query
+        format: int32
+  /ping:
     get:
       responses:
-        200:
-          description: "200 OK"
-      security:
-      - basic-1: []
+        '200':
+          description: 200 OK
+  '/basic-auth-generic/{username}/{password}':
+    get:
+      responses:
+        '200':
+          description: 200 OK
     parameters:
-    - $ref: "#/parameters/username"
-    - $ref: "#/parameters/password"
-    - name: ""
-      type: "string"
-      required: false
-      in: "query"
+      - $ref: '#/parameters/username'
+      - $ref: '#/parameters/password'
   /custom-consent-form:
     get:
       responses:
-        200:
-          description: "200 OK"
+        '200':
+          description: 200 OK
   /custom-login-form:
     get:
       responses:
-        200:
-          description: "200 OK"
-  /basic-auth-metadata/{username}/{password}:
+        '200':
+          description: 200 OK
+  '/basic-auth-metadata/{username}/{password}':
     get:
       responses:
-        200:
-          description: "200 OK"
-      security:
-      - basic-1: []
+        '200':
+          description: 200 OK
     parameters:
-    - $ref: "#/parameters/username"
-    - $ref: "#/parameters/password"
-  /basic-auth/{username}/{password}:
+      - $ref: '#/parameters/username'
+      - $ref: '#/parameters/password'
+  '/basic-auth/{username}/{password}':
     get:
       responses:
-        200:
-          description: "200 OK"
-      security:
-      - basic-1: []
+        '200':
+          description: 200 OK
     parameters:
-    - $ref: "#/parameters/username"
-    - $ref: "#/parameters/password"
+      - $ref: '#/parameters/username'
+      - $ref: '#/parameters/password'
 definitions: {}
 tags: []
 parameters:
   username:
-    name: "username"
-    type: "string"
+    name: username
+    type: string
     required: true
-    in: "path"
-    description: "User Name"
+    in: path
+    description: User Name
   password:
-    name: "password"
-    type: "string"
+    name: password
+    type: string
     required: true
-    in: "path"
-    description: "Password"
+    in: path
+    description: Password
+

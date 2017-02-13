@@ -18,6 +18,7 @@
 #      2/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
 #   7.  curl -k -v 'https://datapower/spoon/sb/utility/responsecode/404
 #   8.  curl -k -v https://datapower/spoon/sb/utility/ping
+
 swagger: '2.0'
 info:
   x-ibm-name: utility
@@ -31,10 +32,8 @@ consumes:
   - application/json
 produces:
   - application/json
-securityDefinitions:
-  basic-1:
-    type: basic
-    description: ''
+
+securityDefinitions: {}
 x-ibm-configuration:
   testable: true
   enforced: true
@@ -168,12 +167,6 @@ x-ibm-configuration:
                       else {
                           apic.setvariable('message.status.code', 401);
                       }
-            - condition: "((request.verb==='GET')&&(api.operation.path==='/third-party-authenticate/authenticate'))"
-              execute:
-                - gatewayscript:
-                    title: Third Party Authenticator (2/2)
-                    version: 1.0.0
-                    source: "var hash = require('crypto').createHash('sha256');\n\nvar reqauth = apim.getvariable('request.authorization').split(' ');\nvar splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');\nvar username = splitval[0] || '';\nvar password = splitval[1] || '';\n\nif (hash.update(username).digest('base64') === password)\n    apim.setvariable('message.status.code', 200);\nelse\n    apim.setvariable('message.status.code', 401); \n"
             - condition: "((request.verb==='GET')&&(api.operation.path==='/third-party-authenticate'))"
               execute:
                 - gatewayscript:
@@ -208,13 +201,11 @@ x-ibm-configuration:
           version: 1.0.0
   phase: realized
 paths:
-  /third-party-authenticate/authenticate:
+  /ping:
     get:
       responses:
         '200':
           description: 200 OK
-      security:
-        - basic-1: []
   /third-party-authenticate:
     get:
       responses:
@@ -238,11 +229,6 @@ paths:
         required: false
         in: query
         format: int32
-  /ping:
-    get:
-      responses:
-        '200':
-          description: 200 OK
   '/basic-auth-generic/{username}/{password}':
     get:
       responses:

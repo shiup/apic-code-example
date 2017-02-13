@@ -12,6 +12,18 @@ Refer to the comment in the utility.yaml for the function that can be customized
 
 Note that this is work in progress, and as time allowed, and more customization is created, I will enhance this file.  And feel free to contribute to it too.
 
+## get your own response code, /responsecode/{responsecode}
+
+This api returns the HTTP response code per request, {responsecode}.
+```
+~ (💃 ) curl -k -v 'https://datapower/spoon/sb/utility/responsecode/404'
+*   Trying 9.33.68.178...
+....
+< HTTP/1.1 404 Not Found
+.....
+~ (💃 )
+```
+
 ## using authenticate-url generic, /basic-auth-generic/{username}/{password}   
 [Support Authenticate URL on IBM APIC](http://www.ibm.com/support/knowledgecenter/SSMNED_5.0.0/com.ibm.apic.toolkit.doc/con_auth_url.html).
 
@@ -106,4 +118,11 @@ The following similates what APIc will issue in a 302 redirect (1/2)
 The following similates what APIc will issue in the confirming of the username and confirmation code (2/2)
 - curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
 
+```
+
+## using a ping service (possibily for health check with load balancer)
+
+```
+The following similates what APIc will return http 200 response code
+- curl -k -v https://datapower/spoon/sb/utility/ping
 ```

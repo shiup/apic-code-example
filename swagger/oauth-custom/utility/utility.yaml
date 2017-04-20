@@ -92,7 +92,7 @@ x-ibm-configuration:
                     version: 1.0.0
                     source: |-
                       var apic = require('./apim.custom.js');
-                      apic.setvariable('message.headers.api-oauth-metadata-for-accesstoken', 'custom metadata for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
+                      apic.setvariable('message.headers.api-oauth-metadata-for-accesstoken', '{"s":"a","id-for-oidc", "cn=spoon,o=ibm"}');
                       apic.setvariable('message.headers.api-oauth-metadata-for-payload', 'custom payload data for the accesstoken for user ' + apic.getvariable('request.parameters.username'));
             - condition: "((request.verb==='GET')&&(api.operation.path==='/custom-login-form'))"
               execute:

@@ -1,0 +1,86 @@
+swagger: '2.0'
+info:
+  x-ibm-name: utility
+  title: utility
+  version: 1.0.0
+schemes:
+  - https
+host: $(catalog.host)
+basePath: /utility
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions: {}
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  cors:
+    enabled: true
+  assembly:
+    execute:
+      - operation-switch:
+          title: operation-switch
+          case:
+            - operations:
+                - verb: get
+                  path: /ping
+              execute:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: |-
+                      session.output.write({"message":"hello world!"});
+                      apim.output("application/json");
+            - operations:
+                - verb: get
+                  path: '/basic-auth/{username}/{password}'
+              execute:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: |
+                      var reqauth = apim.getvariable('request.authorization').split(' ');
+                      var splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');
+                      var username = splitval[0] || '';
+                      var password = splitval[1] || '';
+                      apim.console.debug('user credential : [' + username + ':' + password + ']');
+                      if (username === apim.getvariable('request.parameters.username') && password === apim.getvariable('request.parameters.password')) {
+                        session.output.write({"authenticatedUser":username});
+                        apim.setvariable('message.headers.api-authenticated-credential', 'cn=' + username + ',email=' + username + '@poon.com');
+                        apim.setvariable('message.status.code', 200);
+                        apim.output('application/json');
+                      }
+                      else {
+                        apim.setvariable('message.status.code', 401);
+                      }
+          otherwise: []
+          version: 1.0.0
+  gateway: datapower-gateway
+paths:
+  '/basic-auth/{username}/{password}':
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - name: username
+        type: string
+        required: true
+        in: path
+        description: Username
+      - name: password
+        type: string
+        required: true
+        in: path
+        description: Password
+  /ping:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+      security:
+        - {}
+definitions: {}
+tags: []
+

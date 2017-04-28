@@ -1,13 +1,13 @@
 swagger: '2.0'
 info:
-  x-ibm-name: oidc
-  title: oidc
+  x-ibm-name: oauth2-provider
+  title: OAuth2 OIDC Provider
   version: 1.0.0
   description: "Provide a template on how to enable OIDC for APIC OAuth provider. \nAuthorization Code : the standard OAuth protocol\nResource Owner Grant Type : the 2 legged owner grant type\nClient Credential : there is no user in this, and thus no id_token will be created\nSkip:\nImplicit : this is a subset of authorization code grant type, public client"
 schemes:
   - https
 host: $(catalog.host)
-basePath: /oidc
+basePath: /
 securityDefinitions:
   clientID:
     description: "application's client_id"
@@ -245,12 +245,13 @@ x-ibm-configuration:
   oauth2:
     client-type: confidential
     scopes:
-      banking: Banking Information
+      pokemon: Banking Information
       openid: Enable OIDC
     grants:
       - password
       - accessCode
       - application
+      - implicit
     identity-extraction:
       type: default-form
     authentication:
@@ -274,63 +275,89 @@ x-ibm-configuration:
   gateway: datapower-gateway
   assembly:
     execute:
+      - switch:
+          title: switch
+          case:
+            - condition: "(((request.verb==='GET')&&(api.operation.path==='/oauth2/authorize'))||((request.verb==='POST')&&(api.operation.path==='/oauth2/authorize')) && new String (apim.getvariable ('message.status.code')).startsWith ('302'))"
+              execute:
+                - xslt:
+                    title: xslt
+                    input: false
+                    version: 1.0.0
+                    source: "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n  version=\"1.0\" \n  xmlns:dp=\"http://www.datapower.com/extensions\"\n  xmlns:apim=\"http://www.ibm.com/apimanagement\"\n  extension-element-prefixes=\"dp apim\"\n  exclude-result-prefixes=\"dp apim\">\n  <xsl:include href=\"local://isp/policy/apim.setvariable-impl.xsl\" dp:ignore-multiple=\"yes\"/>\n  <xsl:template match=\"/\">\n    <xsl:if test=\"starts-with(dp:http-response-header('x-dp-response-code'), '302') and\n                  contains(dp:http-response-header('Location'), 'access_token')\">\n      <xsl:call-template name=\"apim:setVariableImpl\">\n        <xsl:with-param name=\"rawName\" select=\"'oidc-location'\"/>\n        <xsl:with-param name=\"rawValue\" select=\"dp:http-response-header('Location')\"/>\n        <xsl:with-param name=\"action\" select=\"'set'\"/>\n      </xsl:call-template>\n      <xsl:call-template name=\"apim:setVariableImpl\">\n        <xsl:with-param name=\"rawName\" select=\"'oidc-credential'\"/>\n        <xsl:with-param name=\"rawValue\" select=\"string(dp:variable('var://context/_apimgmt/authenticated-username'))\"/>\n        <xsl:with-param name=\"action\" select=\"'set'\"/>\n      </xsl:call-template>\n    </xsl:if>\n  </xsl:template>\n</xsl:stylesheet>"
+            - condition: "((request.verb==='POST')&&(api.operation.path==='/oauth2/token'))"
+              execute:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: |-
+                      var _apimgmt = session.name('_apimgmt');
+                      var grantType = _apimgmt.getVariable('requested-grant-type');
+
+                      if (grantType === 'password' ||
+                          grantType === 'code') {
+                        // get scope
+                        var splitScope = (apim.getvariable('message.body').scope || '').split(' ');
+                        for (var i = 0; i < splitScope.length; i++) {
+                          if (splitScope[i] === 'openid') {
+                            var userIdentity = _apimgmt.getVariable('authenticated-username');
+                            apim.setvariable('oidc-credential', userIdentity, 'set');
+                          }
+                        }
+                      }
+          version: 1.0.0
       - if:
           title: if
-          condition: "(($(message.body.access_token) || '') !== '')"
+          condition: "apim.getvariable('oidc-credential') !== undefined"
           execute:
+            - set-variable:
+                title: set-variable
+                actions:
+                  - set: iss.claim
+                    value: Spoon Bank Inc
+                  - set: sign-jwk
+                    value: '{   "kty": "RSA",   "d": "AQZvY1Z3Jymu7eKDAoZ9P-v5QvqCMb7EtDfTkW-CIOsvh4jVPIK-gwmoEqq4ic8WVOfQAEN4hN5SMuMoJu0xGpGtqIbYTl1yoJ22zFXXCWg0lv1InQmkg6EuaOzncSL7gnXxkWQUCbbtxMMwulKaQLUIR1vOGhPIjiNWrhwNxz2igbTHUEhPYaxzXMFukJiYnmeUd5FGq_QnhR_R4CgQt3yTKaAEWF2LlaejeDkqMXHCSuXRq-Ua3Y1IYzn3AXPoF9nfAV5QJezITDdSPAK5_hkKSLzb92Y6Pg7jXhH3DgfLVolpxrZWmK58P2IGz1uhuw9Nh_4a0_gw5xTNBNbAPSTOI6S9X7pt1rTSShYBOEJZ3MF7w3NDH2dsvkjZcdUxgvaHTrZKDtg2OJP0Go1sePvJHZJ1S0jjrSXMQyTagvjVhO0FQ_LuFrEhKPDpeXmyvVUJ8ud9oboJ_PbeL8bxOzp8HD6MI2SjrjtZ4SCmz3afdNKoS0_0Dk3i-JaV9kxVqUQYAGwRoccgh8aoIARMHGjlPP97lJkdIOxHb8KAjxa0GX5ZFz77xjz9P0E54u_TmKXj4iVGuY-yA33TNC0muwzm5q2HOlUg7DhPUryGGoLTMv7hChuFj9J5c6BXvvVe3ukfQkfsTglS2JuMsGDOcLFCd5SGoa9myu5xD-uqhG2p",   "e": "AQAB",   "use": "sig",   "kid": "spoon",   "alg": "RS512",   "n": "At1JEfmAE-rOFUyNo1oj-o5cLC3w6z18gz3wA1oB3DFh1a1t3okvT-KbwPHQONa2QCKheF7VeEa3RJc4l7n5CK-CBuGzENw43YZXJFz8HfwdSSibzB18c0abP89IF0CnW2zJCcO-4bkHNgxZg_tg5wfbuXMQ3JTFkuAgrArpzZchbIl9ihjnPBq65DsxY3RwO-aqf03bGbwKXGUlE4wY7IKF25ofomrwnNrew4eS4iBenTxaQosaWAnBxV791-6Nu7fodcKcieHg3GG7xufeN7gOQH7VmZSNt5r9pFq71rsGNsb5ncrcT0t76Tw9RHMjYanY5YGpmftyfwqvuERsiGmZFrzHd_iBvLgZYWI8JRPbWgGniv493MFE5pP-NnHTTJU6sW313Z0soNH3tt5dI-2ARN6P3RrUDfusRCxwmqiYdjXHdo67WzXPvYmAs7Pdmp2zlgOdPCSokRw2D3Oq1_lHIsIaTrNY7sTU-jwLpZBZFAbhZoQMPFwoyDlZpUwHsChvN42ZH8tnvggKV_yDoq2wyA8nfPdlVIY86nLaXYP873E661eAONbZxEBntZMozYVzraWkwy3VxG2HgnD89UXZuPzBKwnt0PW_R554jrEYl2-8KT1vEWDrBxBPTm0Q6Js444U6NNmoHD1UIWW0yt3P86lTjWJWPTciTJBt_ann" }'
+                  - set: private.claim
+                    value: '{"disclaimer":"for demo purpose"}'
+                version: 1.0.0
+            - jwt-generate:
+                title: jwt-generate
+                iss-claim: iss.claim
+                exp-claim: 3600
+                version: 1.0.0
+                jwt: idtoken
+                jti-claim: true
+                sub-claim: oidc-credential
+                aud-claim: client.app.id
+                private-claims: private.claim
+                jws-alg: RS512
+                jws-jwk: sign-jwk
             - gatewayscript:
                 title: gatewayscript
                 version: 1.0.0
                 source: |-
-                  var _apimgmt = session.name('_apimgmt');
-                  var grantType = _apimgmt.getVariable('requested-grant-type');
+                  var grantType = session.name('_apimgmt').getVariable('requested-grant-type');
 
-                  console.error('granttype', grantType);
-                  if (grantType === 'password' ||
-                      grantType === 'code') {
-                          console.error('here');
-                    // get scope
-                    var splitScope = (apim.getvariable('message.body').scope || '').split(' ');
-                    for (var i = 0; i < splitScope.length; i++) {
-                      if (splitScope[i] === 'openid') {
-                        var userIdentity = _apimgmt.getVariable('authenticated-username');
-                        apim.setvariable('oidc-credential', userIdentity, 'set');
-                      }
-                    }
+                  if (grantType === 'implicit') {
+                    // regression in 5070 will not allow access, and modification to the location header
+                    var location = apim.getvariable('oidc-location') + '&id_token=' + apim.getvariable("idtoken");
+                    // work around is to use xslr
+                    apim.setvariable('oidc-location', location);
+                  }
+                  else {
+                    var token = apim.getvariable("message.body");
+                    token["id_token"] = apim.getvariable("idtoken");
+                    apim.setvariable("message.body", JSON.stringify(token));
                   }
             - if:
                 title: if
-                condition: "apim.getvariable('oidc-credential') !== undefined"
+                condition: "new String (apim.getvariable ('message.status.code')).startsWith('302')"
                 execute:
-                  - set-variable:
-                      title: set-variable
-                      actions:
-                        - set: iss.claim
-                          value: Spoon Bank Inc
-                        - set: sign-jwk
-                          value: '{   "kty": "RSA",   "d": "AQZvY1Z3Jymu7eKDAoZ9P-v5QvqCMb7EtDfTkW-CIOsvh4jVPIK-gwmoEqq4ic8WVOfQAEN4hN5SMuMoJu0xGpGtqIbYTl1yoJ22zFXXCWg0lv1InQmkg6EuaOzncSL7gnXxkWQUCbbtxMMwulKaQLUIR1vOGhPIjiNWrhwNxz2igbTHUEhPYaxzXMFukJiYnmeUd5FGq_QnhR_R4CgQt3yTKaAEWF2LlaejeDkqMXHCSuXRq-Ua3Y1IYzn3AXPoF9nfAV5QJezITDdSPAK5_hkKSLzb92Y6Pg7jXhH3DgfLVolpxrZWmK58P2IGz1uhuw9Nh_4a0_gw5xTNBNbAPSTOI6S9X7pt1rTSShYBOEJZ3MF7w3NDH2dsvkjZcdUxgvaHTrZKDtg2OJP0Go1sePvJHZJ1S0jjrSXMQyTagvjVhO0FQ_LuFrEhKPDpeXmyvVUJ8ud9oboJ_PbeL8bxOzp8HD6MI2SjrjtZ4SCmz3afdNKoS0_0Dk3i-JaV9kxVqUQYAGwRoccgh8aoIARMHGjlPP97lJkdIOxHb8KAjxa0GX5ZFz77xjz9P0E54u_TmKXj4iVGuY-yA33TNC0muwzm5q2HOlUg7DhPUryGGoLTMv7hChuFj9J5c6BXvvVe3ukfQkfsTglS2JuMsGDOcLFCd5SGoa9myu5xD-uqhG2p",   "e": "AQAB",   "use": "sig",   "kid": "spoon",   "alg": "RS512",   "n": "At1JEfmAE-rOFUyNo1oj-o5cLC3w6z18gz3wA1oB3DFh1a1t3okvT-KbwPHQONa2QCKheF7VeEa3RJc4l7n5CK-CBuGzENw43YZXJFz8HfwdSSibzB18c0abP89IF0CnW2zJCcO-4bkHNgxZg_tg5wfbuXMQ3JTFkuAgrArpzZchbIl9ihjnPBq65DsxY3RwO-aqf03bGbwKXGUlE4wY7IKF25ofomrwnNrew4eS4iBenTxaQosaWAnBxV791-6Nu7fodcKcieHg3GG7xufeN7gOQH7VmZSNt5r9pFq71rsGNsb5ncrcT0t76Tw9RHMjYanY5YGpmftyfwqvuERsiGmZFrzHd_iBvLgZYWI8JRPbWgGniv493MFE5pP-NnHTTJU6sW313Z0soNH3tt5dI-2ARN6P3RrUDfusRCxwmqiYdjXHdo67WzXPvYmAs7Pdmp2zlgOdPCSokRw2D3Oq1_lHIsIaTrNY7sTU-jwLpZBZFAbhZoQMPFwoyDlZpUwHsChvN42ZH8tnvggKV_yDoq2wyA8nfPdlVIY86nLaXYP873E661eAONbZxEBntZMozYVzraWkwy3VxG2HgnD89UXZuPzBKwnt0PW_R554jrEYl2-8KT1vEWDrBxBPTm0Q6Js444U6NNmoHD1UIWW0yt3P86lTjWJWPTciTJBt_ann" }'
-                        - set: private.claim
-                          value: '{"disclaimer":"for demo purpose"}'
+                  - xslt:
+                      title: xslt
+                      input: false
                       version: 1.0.0
-                  - jwt-generate:
-                      title: jwt-generate
-                      iss-claim: iss.claim
-                      exp-claim: 3600
-                      version: 1.0.0
-                      jwt: idtoken
-                      jti-claim: true
-                      sub-claim: oidc-credential
-                      aud-claim: client.app.id
-                      private-claims: private.claim
-                      jws-alg: RS512
-                      jws-jwk: sign-jwk
-                  - gatewayscript:
-                      title: gatewayscript
-                      version: 1.0.0
-                      source: |-
-                        var token = apim.getvariable("message.body");
-                        token["id_token"] = apim.getvariable("idtoken");
-                        apim.setvariable("message.body", JSON.stringify(token));
+                      source: "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n  version=\"1.0\" \n  xmlns:dp=\"http://www.datapower.com/extensions\"\n  xmlns:apim=\"http://www.ibm.com/apimanagement\"\n  extension-element-prefixes=\"dp apim\"\n  exclude-result-prefixes=\"dp apim\">\n  <xsl:include href=\"local://isp/policy/apim.setvariable-impl.xsl\" dp:ignore-multiple=\"yes\"/>\n  <xsl:template match=\"/\">\n    <xsl:variable name=\"loc\" select=\"apim:getVariableImpl('oidc-location')\"/>\n    <dp:set-http-response-header name=\"'Location'\" value=\"$loc\"/>\n  </xsl:template>\n</xsl:stylesheet>"
                 version: 1.0.0
           version: 1.0.0
     catch: []

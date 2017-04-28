@@ -284,7 +284,29 @@ x-ibm-configuration:
                     title: xslt
                     input: false
                     version: 1.0.0
-                    source: "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n  version=\"1.0\" \n  xmlns:dp=\"http://www.datapower.com/extensions\"\n  xmlns:apim=\"http://www.ibm.com/apimanagement\"\n  extension-element-prefixes=\"dp apim\"\n  exclude-result-prefixes=\"dp apim\">\n  <xsl:include href=\"local://isp/policy/apim.setvariable-impl.xsl\" dp:ignore-multiple=\"yes\"/>\n  <xsl:template match=\"/\">\n    <xsl:if test=\"starts-with(dp:http-response-header('x-dp-response-code'), '302') and\n                  contains(dp:http-response-header('Location'), 'access_token')\">\n      <xsl:call-template name=\"apim:setVariableImpl\">\n        <xsl:with-param name=\"rawName\" select=\"'oidc-location'\"/>\n        <xsl:with-param name=\"rawValue\" select=\"dp:http-response-header('Location')\"/>\n        <xsl:with-param name=\"action\" select=\"'set'\"/>\n      </xsl:call-template>\n      <xsl:call-template name=\"apim:setVariableImpl\">\n        <xsl:with-param name=\"rawName\" select=\"'oidc-credential'\"/>\n        <xsl:with-param name=\"rawValue\" select=\"string(dp:variable('var://context/_apimgmt/authenticated-username'))\"/>\n        <xsl:with-param name=\"action\" select=\"'set'\"/>\n      </xsl:call-template>\n    </xsl:if>\n  </xsl:template>\n</xsl:stylesheet>"
+                    source: |-
+                      <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+                        xmlns:dp="http://www.datapower.com/extensions"
+                        xmlns:apim="http://www.ibm.com/apimanagement"
+                        extension-element-prefixes="dp apim"
+                        exclude-result-prefixes="dp apim">
+                        <xsl:include href="local://isp/policy/apim.setvariable-impl.xsl" dp:ignore-multiple="yes"/>
+                        <xsl:template match="/">
+                          <xsl:if test="starts-with(dp:http-response-header('x-dp-response-code'), '302') and
+                                        contains(dp:http-response-header('Location'), 'access_token')">
+                            <xsl:call-template name="apim:setVariableImpl">
+                              <xsl:with-param name="rawName" select="'oidc-location'"/>
+                              <xsl:with-param name="rawValue" select="dp:http-response-header('Location')"/>
+                              <xsl:with-param name="action" select="'set'"/>
+                            </xsl:call-template>
+                            <xsl:call-template name="apim:setVariableImpl">
+                              <xsl:with-param name="rawName" select="'oidc-credential'"/>
+                              <xsl:with-param name="rawValue" select="string(dp:variable('var://context/_apimgmt/authenticated-username'))"/>
+                              <xsl:with-param name="action" select="'set'"/>
+                            </xsl:call-template>
+                          </xsl:if>
+                        </xsl:template>
+                      </xsl:stylesheet>
             - condition: "((request.verb==='POST')&&(api.operation.path==='/oauth2/token'))"
               execute:
                 - gatewayscript:
@@ -357,7 +379,18 @@ x-ibm-configuration:
                       title: xslt
                       input: false
                       version: 1.0.0
-                      source: "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\"\n  version=\"1.0\" \n  xmlns:dp=\"http://www.datapower.com/extensions\"\n  xmlns:apim=\"http://www.ibm.com/apimanagement\"\n  extension-element-prefixes=\"dp apim\"\n  exclude-result-prefixes=\"dp apim\">\n  <xsl:include href=\"local://isp/policy/apim.setvariable-impl.xsl\" dp:ignore-multiple=\"yes\"/>\n  <xsl:template match=\"/\">\n    <xsl:variable name=\"loc\" select=\"apim:getVariableImpl('oidc-location')\"/>\n    <dp:set-http-response-header name=\"'Location'\" value=\"$loc\"/>\n  </xsl:template>\n</xsl:stylesheet>"
+                      source: |-
+                        <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0"
+                          xmlns:dp="http://www.datapower.com/extensions"
+                          xmlns:apim="http://www.ibm.com/apimanagement"
+                          extension-element-prefixes="dp apim"
+                          exclude-result-prefixes="dp apim">
+                          <xsl:include href="local://isp/policy/apim.setvariable-impl.xsl" dp:ignore-multiple="yes"/>
+                          <xsl:template match="/">
+                            <xsl:variable name="loc" select="apim:getVariableImpl('oidc-location')"/>
+                            <dp:set-http-response-header name="'Location'" value="$loc"/>
+                          </xsl:template>
+                        </xsl:stylesheet>
                 version: 1.0.0
           version: 1.0.0
     catch: []

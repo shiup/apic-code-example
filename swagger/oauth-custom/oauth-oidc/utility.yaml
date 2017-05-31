@@ -39,25 +39,163 @@ x-ibm-configuration:
                 - gatewayscript:
                     title: gatewayscript
                     version: 1.0.0
-                    source: |
+                    source: |-
                       var reqauth = apim.getvariable('request.authorization').split(' ');
                       var splitval = new Buffer((reqauth[1] || ''), 'base64').toString('utf8').split(':');
                       var username = splitval[0] || '';
                       var password = splitval[1] || '';
                       apim.console.debug('user credential : [' + username + ':' + password + ']');
                       if (username === apim.getvariable('request.parameters.username') && password === apim.getvariable('request.parameters.password')) {
-                        session.output.write({"authenticatedUser":username});
-                        apim.setvariable('message.headers.api-authenticated-credential', 'cn=' + username + ',email=' + username + '@poon.com');
-                        apim.setvariable('message.status.code', 200);
-                        apim.output('application/json');
+                          session.output.write({"authenticatedUser":username});
+                          apim.setvariable('message.headers.api-authenticated-credential', 'cn=' + username + ',email=' + username + '@poon.com');
+                          apim.setvariable('message.headers.x-selected-scope', 'starwar startrek');
+                          apim.setvariable('message.status.code', 200);
+                          apim.output('application/json');
                       }
                       else {
-                        apim.setvariable('message.status.code', 401);
+                          apim.setvariable('message.status.code', 401);
                       }
+            - operations:
+                - verb: post
+                  path: /scope/check
+              execute:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: |
+                      apim.setvariable('message.headers.x-add-response', '123456');
+                      apim.setvariable('message.headers.x-another', 'external');
+            - operations:
+                - verb: get
+                  path: /identity-extract-redirect
+              execute:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: |-
+                      console.error('original-url : ', apim.getContext('request.parameters.original-url'));
+                      console.error('app-name : ', apim.getContext('request.parameters.app-name'));
+                      console.error('appid : ', apim.getContext('request.parameters.appid'));
+                      console.error('org : ', apim.getContext('request.parameters.org'));
+                      console.error('orgid : ', apim.getContext('request.parameters.orgid'));
+                      console.error('catalog : ', apim.getContext('request.parameters.catalog'));
+                      console.error('catalogid : ', apim.getContext('request.parameters.catalogid'));
+                      apim.setvariable('message.status.code', 302);
+                      var hm = require('header-metadata');
+                      var redirect = decodeURIComponent(apim.getContext('request.parameters.original-url')) + '&confirmation=spoon&username=spoon';
+
+                      hm.response.set('Location', redirect);
+            - operations:
+                - verb: post
+                  path: /third-party-oauth-introspect/proxy
+              execute:
+                - proxy:
+                    title: proxy
+                    timeout: 60
+                    verb: keep
+                    cache-response: protocol
+                    cache-ttl: 900
+                    version: 1.0.0
+                    username: introspect-username
+                    password: introspect-password
+                    target-url: 'https://$(api.endpoint.address)/$(api.root)/third-party-oauth-introspect/demo-purpose'
+            - operations:
+                - verb: post
+                  path: /third-party-oauth-introspect/demo-purpose
+              execute:
+                - gatewayscript:
+                    title: gatewayscript
+                    version: 1.0.0
+                    source: |+
+                      // this simulates what 3rd Party OAuth Provider will return as a valid access_token response
+                      // if x-provider-denied === true, set `active` claim to false
+
+                      var response = {"active" : true};
+
+                      if (apim.getContext('request.headers.x-provider-denied') === 'true') {
+                          response.active = false;
+                      }
+                      response['input-token'] = apim.getContext('request.parameters.token');
+                      response['basic-authorization'] = apim.getContext('request.authorization');
+                      apim.output('application/json');
+                      apim.setvariable('message.status.code', 200);
+                      session.output.write(JSON.stringify(response));
+
           otherwise: []
           version: 1.0.0
   gateway: datapower-gateway
 paths:
+  /third-party-oauth-introspect/demo-purpose:
+    post:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - $ref: '#/parameters/token'
+      - $ref: '#/parameters/token_type_hint'
+      - $ref: '#/parameters/x-provider-denied'
+  /third-party-oauth-introspect/proxy:
+    post:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - name: token_type_hint
+        type: string
+        required: true
+        in: query
+        description: access_token
+      - name: token
+        type: string
+        required: true
+        in: query
+        description: actual token
+  /identity-extract-redirect:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - name: original-url
+        type: string
+        required: false
+        in: query
+        description: Original-URL
+      - name: app-name
+        type: string
+        required: false
+        in: query
+        description: appName
+      - name: appid
+        type: string
+        required: false
+        in: query
+        description: appId
+      - name: org
+        type: string
+        required: false
+        in: query
+        description: OrgName
+      - name: orgid
+        type: string
+        required: false
+        in: query
+        description: OrgId
+      - name: catalog
+        type: string
+        required: false
+        in: query
+        description: catalogName
+      - name: catalogid
+        type: string
+        required: false
+        in: query
+        description: catalogId
+  /scope/check:
+    post:
+      responses:
+        '200':
+          description: 200 OK
   '/basic-auth/{username}/{password}':
     get:
       responses:
@@ -83,4 +221,19 @@ paths:
         - {}
 definitions: {}
 tags: []
-
+parameters:
+  token:
+    name: token
+    type: string
+    required: false
+    in: query
+  token_type_hint:
+    name: token_type_hint
+    type: string
+    required: false
+    in: query
+  x-provider-denied:
+    name: x-provider-denied
+    type: string
+    required: false
+    in: header

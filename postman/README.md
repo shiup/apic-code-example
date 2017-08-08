@@ -35,9 +35,12 @@ Postman is a nifty tool for testing api, it allows you to easily set up a set of
 
   - To configure `Setting`,
     - From the top right corner, select the ![down arrow](https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanSetting-1.png)
+
     - From ![Setting](https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanSetting-2.png), configure the settings appropriately
+
 3. Create/Manage environment variables
   - Since you can export the Postman package and use it in a different environment, you can use `environment` variables to adjust for the runtime setting.  Setting can be configured from ![top right corner](https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanEnvironment.png)
+
 4. If you need to access result from one api call, as input for another, you can utilize `Tests` that is supported in Postman.  Here is an example on how I utilize the `access_token` returned as this api call, and use it for future api invocation.
   - Define an environment variable, access_token, set the value to `NA`
   - Add this script to the `Tests` section of the API invocation, this is triggered after the api call
@@ -49,9 +52,9 @@ Postman is a nifty tool for testing api, it allows you to easily set up a set of
     postman.setEnvironmentVariable("access_token", at.access_token);
     postman.setEnvironmentVariable("refresh_token", at.refresh_token);
     ```
-  ![As shown here][images/PostmanRunTimeEnvironmentVar.pn
+  ![As shown here][https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanRunTimeEnvironmentVar.png)
 
-  Putting it all together
+  **Putting it all together**
   1. First determine what all the containers (and there are two) are running, and their corresponding ports.  To decipher the following DP 9090 port is mapped to 32809, this way, you can access DataPower webgui with `https://127.0.0.132809` from the browser
 ```
 ~/oidc (💃 ) docker ps

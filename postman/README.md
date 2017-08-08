@@ -52,7 +52,7 @@ Postman is a nifty tool for testing api, it allows you to easily set up a set of
     postman.setEnvironmentVariable("access_token", at.access_token);
     postman.setEnvironmentVariable("refresh_token", at.refresh_token);
     ```
-  ![As shown here][https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanRunTimeEnvironmentVar.png)
+  ![As shown here](https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanRunTimeEnvironmentVar.png)
 
   **Putting it all together**
   1. First determine what all the containers (and there are two) are running, and their corresponding ports.  To decipher the following DP 9090 port is mapped to 32809, this way, you can access DataPower webgui with `https://127.0.0.132809` from the browser

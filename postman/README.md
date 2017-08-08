@@ -32,11 +32,12 @@ Postman is a nifty tool for testing api, it allows you to easily set up a set of
         - testing OAuth implicit grant type
         - using the locally installed Postman to test OAuth (not using the OAuth authorization - i.e. building the call manually)
       - For testing IBM APIc OAuth identity->redirect, I would highly recommend to leave this to `on`.
+
   - To configure `Setting`,
-    - From the top right corner, select the ![down arrow][images/PostmanSetting-1.png]
-    - From ![Setting][images/PostmanSetting-2.png], configure the settings appropriately
+    - From the top right corner, select the ![down arrow](https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanSetting-1.png)
+    - From ![Setting](https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanSetting-2.png), configure the settings appropriately
 3. Create/Manage environment variables
-  - Since you can export the Postman package and use it in a different environment, you can use `environment` variables to adjust for the runtime setting.  Setting can be configured from ![top right corner][images/PostmanEnvironment.png]
+  - Since you can export the Postman package and use it in a different environment, you can use `environment` variables to adjust for the runtime setting.  Setting can be configured from ![top right corner](https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanEnvironment.png)
 4. If you need to access result from one api call, as input for another, you can utilize `Tests` that is supported in Postman.  Here is an example on how I utilize the `access_token` returned as this api call, and use it for future api invocation.
   - Define an environment variable, access_token, set the value to `NA`
   - Add this script to the `Tests` section of the API invocation, this is triggered after the api call
@@ -75,11 +76,31 @@ oauth-redirect-uri: https://www.getpostman.com/oauth2/callback
   Service postman-gw running on port 4003.
   ```
 
-  If all works, you should see something simliar to ![this][images/APIDevImage.png] on your browser.
+  If all works, you should see something simliar to ![this](https://github.com/shiup/apic-code-example/blob/master/postman/images/APIDevImage.png) on your browser.
 
   To test out the above, you can use the yamls and Postman setting attached.  Here is the [recording](https://www.youtube.com/watch?v=-Ha7OST5WvQ&feature=youtu.be), which covers this portion of Postman.
 
 ## Running as Chrome extension ##
 
-1. Install Chrome and Postman, once you are done, you should be able to launch it from Chrome, as show ![here][images/PostmanPluginChrome.png].
-2.
+1. Install Chrome and Postman, once you are done, you should be able to launch it from Chrome, as show ![here](https://github.com/shiup/apic-code-example/blob/master/postman/images/PostmanPluginChrome.png).
+2. Make sure OAuth -> redirect_uri is set up properly, https://www/getpostman.com/oauth2/callback, the command is `apic config:set oauth-redirect-uri=https://www/getpostman.com/oauth2/callback`
+3. Click `LAUNCH APP` from the Postman
+4. Define the api that is protected by OAuth, in this case, we are using, `{{url}}/info`.
+5. Select `Authorization` tab, choose `OAuth 2.0` as `Type`
+  - Enter configuration for the OAuth Provider
+    - Token Name : oauth-az-code-5080-760
+    - Auth URL : <oauth authoriziaton endpoint>
+    - Access Token URL : <oauth token endpoint>
+    - Client ID : <client_id>
+    - Client Secret : <client_secret>
+    - Scope : <requested scope>
+    - Grant Type : Authorization Code
+      - the other grant type is `Client Credential`, which is less interesting
+    - Select `Rquest access token locally`
+  - Select `Request Token`, see ![Get New Access Token](https://github.com/shiup/apic-code-example/blob/master/postman/images/GetNewAccessToken.png)
+6. If Step 5. works, you will see an entry under `Existing Tokens`
+  - Select the new entry, the token information will show in `Token Details section`
+  - Select `Use Token`, see ![Use Token screen](https://github.com/shiup/apic-code-example/blob/master/postman/images/UseAccessToken.png)
+7. Select `Send`, and you should see the api response
+
+The recording of the above will be posted shortly in the future.

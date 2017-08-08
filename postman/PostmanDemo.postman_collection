@@ -1,0 +1,272 @@
+{
+	"variables": [],
+	"info": {
+		"name": "PostmanDemo",
+		"_postman_id": "257731b0-6283-ec2b-887c-14051b544202",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "[AuthorizationCode]GettingInitialCode",
+			"request": {
+				"url": {
+					"raw": "{{url}}/oauth2/authorize?response_type=code&client_id={{client_id}}&scope={{scope}}&redirect_uri={{redirect_uri}}&state={{state}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"oauth2",
+						"authorize"
+					],
+					"query": [
+						{
+							"key": "response_type",
+							"value": "code",
+							"equals": true,
+							"description": "This can be token for implicit grant type"
+						},
+						{
+							"key": "client_id",
+							"value": "{{client_id}}",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "scope",
+							"value": "{{scope}}",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "redirect_uri",
+							"value": "{{redirect_uri}}",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "state",
+							"value": "{{state}}",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Basic c3Bvb246c3Bvb24=",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "[AuthorizationGrantType]Code2Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"postman.clearEnvironmentVariable(\"access_token\");",
+							"postman.clearEnvironmentVariable(\"refresh_token\");",
+							"var at = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"access_token\", at.access_token);",
+							"postman.setEnvironmentVariable(\"refresh_token\", at.refresh_token);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{url}}/oauth2/token",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic ZGVmYXVsdDpTRUNSRVQ=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "authorization_code",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "{{redirect_uri}}",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "code",
+							"value": "AALmfBdnQBGklF_61u4lVfiuzxxqlp0WXZ3vwUnsx-sI2spi4OoV93-_2Lq-akkw4DTvOMZ_H3qx1ijyzBdbsxqPOF6eLQTK_-3Z8HNLniN93B4E4V5-Dqf4YTmz0a5gjSBn-XihCzXLrpbKOLF6BdEu5Fbw2Lf1RcEWCxTNWR3FfGOsByVKo6n5_ey0d7oiXsRb1jhxV0JtPZiMnJdEG3pb-vEVZ_mHTj4r5CzosMScZ8jq9dDA-5EIfiWGuBQSQAq4DCcziF07bebCzzFc9NRlZHTOMjKqTa7ApWemyNDezvIqRro4ca0_3oHrzby7KtgMl_TPmyZzabbm1-S4tN3Eiub9S_GhxcxDbTWXh4x17Q",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Application API invocation",
+			"request": {
+				"url": "{{url}}/info",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "TokenIntrospection",
+			"request": {
+				"url": "{{url}}/oauth2/introspect",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic ZGVmYXVsdDpTRUNSRVQ=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "token_type_hint",
+							"value": "access_token",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{access_token}}",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "RefreshTokenGrantType",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"postman.clearEnvironmentVariable(\"access_token\");",
+							"postman.clearEnvironmentVariable(\"refresh_token\");",
+							"var at = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"access_token\", at.access_token);",
+							"postman.setEnvironmentVariable(\"refresh_token\", at.refresh_token);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{url}}/oauth2/token",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"description": ""
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic ZGVmYXVsdDpTRUNSRVQ=",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "refresh_token",
+							"description": "",
+							"type": "text"
+						},
+						{
+							"key": "refresh_token",
+							"value": "{{refresh_token}}",
+							"description": "",
+							"type": "text"
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "UsePostmanOAuth2.0",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"postman.clearEnvironmentVariable(\"access_token\");",
+							"//postman.clearEnvironmentVariable(\"refresh_token\");",
+							"var at = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"access_token\", at.access_token);",
+							"//postman.setEnvironmentVariable(\"refresh_token\", at.refresh_token);"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{url}}/info",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer AAIHZGVmYXVsdNhehaz0mp4QD2GCa0HIRQAkdEo_mdoo3-cf9QD--rE0QQKdB8-o8uLuYHe_RHjrK14XFknGRE5iMC8tpvD9aiceyAHekASBF8dzgB3E3A5W0KB6ry8IZh99EnXWxRwL-DIKH3tvSxIfMIySG94IXTvOiku5MmBoCKd4-tlQiqTvsGLr6HDffaJe7L39jPpvjjLzcFBjHZIhd4CZ999X1sbZMBliuxLwps3ZluKIDck7eGsh0WEQsgAR-TPfY9iPW_KrelNNISLs11-zhd4X_y3mrYNiDMSQCQICYHlosePuqpmwvewK1Fgy4bVOmL2q0v27muDBrDZi1LV9EMDs1Kg",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

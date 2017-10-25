@@ -12,7 +12,9 @@
 #   5. authenticate-url which provides resource owner credential + metadata for both access_token & access token payload
 #      curl -k -v https://datapower/spoon/sb/utility/basic-auth-metadata/spoon/spoon --user spoon:spoon
 #   6. Add the 'identity extraction' -> 'redirect' support
-#      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing'
+#      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing' <- for a succesful auth
+#      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing&failed=0' <- for a succesful auth
+#      1/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate?original-url=https://abc.com&app-name=testing&failed=1' <- for a failed auth
 #      2/2 : curl -k -v 'https://datapower/spoon/sb/utility/third-party-authenticate/authenticate'  --user 'spoon-testing:b88jaq56OKs49D3u4+jQzs5FeMm8OWSLSD5HXknYXE'
 #   7.  curl -k -v 'https://datapower/spoon/sb/utility/responsecode/404
 #   8.  curl -k -v https://datapower/spoon/sb/utility/ping
@@ -21,7 +23,7 @@ swagger: '2.0'
 info:
   x-ibm-name: utility
   title: utility
-  version: 1.0.0
+  version: 1.0.2
 schemes:
   - https
 host: $(catalog.host)
@@ -30,6 +32,7 @@ consumes:
   - application/json
 produces:
   - application/json
+
 securityDefinitions: {}
 x-ibm-configuration:
   testable: true
@@ -164,6 +167,24 @@ x-ibm-configuration:
                       else {
                           apic.setvariable('message.status.code', 401);
                       }
+            - condition: "((request.verb==='GET')&&(api.operation.path==='/third-party-authenticate'))"
+              execute:
+                - gatewayscript:
+                    title: Third Party Authenticator (1/2)
+                    version: 1.0.0
+                    source: |
+                      var hash = require('crypto').createHash('sha256');
+                      var params = apim.getvariable('request.parameters');
+                      var username = 'spoon-' + params['app-name'];
+                      var confirmationCode = hash.update(username).digest('base64');
+                      var failed = params['failed']
+                      var origUrl = decodeURIComponent(params['original-url'] || '');
+                      if (typeof failed !== 'undefined' && failed != 0)
+                          var location = origUrl + '&username=' + username + '&error=error_flag_not_0';
+                      else
+                          var location = origUrl + '&username=' + username + '&confirmation=' + confirmationCode;
+                      apim.setvariable('message.status.code', 302);
+                       apim.setvariable('message.headers.location', location);
             - condition: "((request.verb==='GET')&&(api.operation.path==='/ping'))"
               execute:
                 - set-variable:
@@ -185,6 +206,29 @@ paths:
       responses:
         '200':
           description: 200 OK
+  /third-party-authenticate:
+    get:
+      responses:
+        '200':
+          description: 200 OK
+    parameters:
+      - name: original-url
+        type: string
+        required: true
+        in: query
+      - name: app-name
+        type: string
+        required: true
+        in: query
+      - name: rstate
+        type: string
+        required: true
+        in: query
+      - name: failed
+        type: integer
+        required: false
+        in: query
+        format: int32
   '/basic-auth-generic/{username}/{password}':
     get:
       responses:

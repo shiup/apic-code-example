@@ -1,0 +1,32 @@
+policy: 1.0.0
+info:
+  title: Custom Policy Template
+  name: policy-name
+  version: 1.0.0
+  description: This is a template, replace this area.
+  contact:
+    name: Spoon
+    url: 'https://github.com/shiup/'
+    email: shiup@shiup.com
+attach:
+  - rest
+  - soap
+gateways:
+  - datapower-api-gateway
+properties:
+  $schema: "http://json-schema.org/draft-04/schema#"
+  type: object
+  properties:
+    myname:
+      label: My name
+      description: This is my parameter
+      type: string
+  required:
+    - myname
+assembly:
+  execute:
+      - gatewayscript:
+          version: 2.0.0
+          title: gatewayscript
+          source: >+
+              console.error('hello world, I am ' + context.get('local.parameter.myname') || 'going places');

@@ -1,0 +1,288 @@
+swagger: '2.0'
+info:
+  x-ibm-name: rewards
+  version: 1.0.0
+  description: >-
+    This API allows Acme Bank customers to use their Acme Points to pay for all
+    or part of a transaction on your app
+  title: rewards
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - switch:
+          version: 2.0.0
+          title: switch
+          case:
+            - condition: (($httpVerb() = 'POST'and $operationPath() = '/redemption'))
+              execute:
+                - parse:
+                    version: 2.1.0
+                    title: parse
+                    parse-settings-reference:
+                      parse-settings:
+                        document_type: json
+                        max_doc_size: 100
+                    use-content-type: true
+                - gatewayscript:
+                    version: 2.0.0
+                    title: gatewayscript
+                    source: >-
+                      let hm=require('header-metadata');
+
+
+                      hm.response.set('content-type','application/json');
+
+
+                      let jsonresponse = {5050: {orderID: "1319281",
+                      availablePointBalance: 9000, pointsRedemeed: 1000}};
+
+
+                      session.output.write(jsonresponse);
+            - condition: (($httpVerb() = 'GET' and $operationPath() = '/pointBalance'))
+              execute:
+                - gatewayscript:
+                    version: 2.0.0
+                    title: gatewayscript
+                    source: >-
+                      let hm=require('header-metadata');
+
+
+                      hm.response.set('content-type','application/json');
+
+
+                      let jsonresponse =
+                      {'user':{'name':'spoon','id':888},'reward':
+                      {'availablePointBalance': 10000, 'maximumPointsToRedeem':
+                      5000, 'minimumPointsToRedeem': 100}};
+
+
+                      session.output.write(jsonresponse);
+            - condition: ($httpVerb() = 'GET' and $operationPath() = '/customerinfo')
+              execute:
+                - set-variable:
+                    version: 2.0.0
+                    title: set-variable
+                    actions:
+                      - set: jwk
+                        value: >-
+                          {"e": "AQAB","n":
+                          "471JQ6XLiRo1PNX_JpJRIV1x1831P3tNiV3veSIwHd7l14MiGl4Jsqub2RmHfvI5_rH98cLIobyr1-CtPbzeMpcbXE8AZlv7pZglAHAiTva6fdAWaiCwUI17iDvjljMKuyxYTa0aihOVyzStSt8B0OvJtBdXeUovbWMXKcF9v7O-G4ME4TnXaTZRqtjep_HwOIhYXP1UwK80k10dbsP8ZInTTVdTBDGbEvgB0NPfWuL2c9_N5Llzy_2JTNLDPL5USXCewfbDZWxNWxyZRes7r-_ZkekD0jRSCSQ376n4e_PDI2HijhJUHy_ZlLQFssm1Uqd8NgclbIpFRDiC7RmYfQ",
+                          "alg": "RS256","kid":
+                          "1F3C442AD3AC2B064A410D542513E9300011697E", "kty":
+                          "RSA","use": "sig"}
+                        type: string
+                    description: jwk to verify the jwt
+                - jwt-validate:
+                    version: 2.0.0
+                    title: jwt-validate
+                    jwt: request.headers.authorization
+                    output-claims: decoded.claims
+                    jwe-jwk: ''
+                    jws-crypto: ''
+                    jws-jwk: jwk
+                - gatewayscript:
+                    version: 2.0.0
+                    title: gatewayscript
+                    source: >-
+                      let hm=require('header-metadata');
+
+
+                      hm.response.set('content-type','application/json');
+
+
+                      let jsonresponse = {'name':'spoon','id':888,'address':'88
+                      Wicked Street, San Mateo, CA,
+                      94403','phone':'888-88-8888'};
+
+                      session.output.write(jsonresponse);
+            - condition: >-
+                ($httpVerb() = 'GET' and $operationPath() =
+                '/pointBalanceWithRedact')
+              execute:
+                - gatewayscript:
+                    version: 2.0.0
+                    title: gatewayscript
+                    source: >-
+                      let hm=require('header-metadata');
+
+
+                      hm.response.set('content-type','application/json');
+
+
+                      let jsonresponse =
+                      {'user':{'name':'spoon','id':888},'reward':
+                      {'availablePointBalance': 10000, 'maximumPointsToRedeem':
+                      5000, 'minimumPointsToRedeem': 100}};
+
+
+                      session.output.write(jsonresponse);
+                - parse:
+                    version: 2.1.0
+                    title: parse
+                    parse-settings-reference:
+                      default: apic-default-parsesettings
+                - redact:
+                    version: 2.0.0
+                    title: redact
+                    redactions:
+                      - action: redact
+                        path: message.body.user.name
+                      - action: redact
+                        path: message.body.user.id
+            - condition: ($httpVerb() = 'GET' and $operationPath() = '/getFamilyMembers')
+              execute:
+                - invoke:
+                    version: 2.2.0
+                    title: invoke
+                    backend-type: detect
+                    header-control:
+                      type: blocklist
+                      values:
+                        - ^SuperSensitive$
+                    parameter-control:
+                      type: allowlist
+                      values: []
+                    http-version: HTTP/1.1
+                    timeout: 60
+                    verb: keep
+                    chunked-uploads: true
+                    persistent-connection: true
+                    cache-response: protocol
+                    cache-ttl: 900
+                    stop-on-error: []
+                    graphql-send-type: detect
+                    websocket-upgrade: false
+                    target-url: https://httpbin.org/get
+                    username: spoon
+                    password: swetha
+            - condition: ($httpVerb() = 'GET' and $operationPath() = '/ratelimit')
+              execute:
+                - ratelimit:
+                    version: 2.2.0
+                    title: ratelimit
+                    source: plan-default
+                - gatewayscript:
+                    version: 2.0.0
+                    title: gatewayscript
+                    source: >-
+                      let hm=require('header-metadata');
+
+
+                      hm.response.set('content-type','application/json');
+
+
+                      let jsonresponse = {'session':'Enterprise API Security
+                      with Ease',
+                          'link':'https://www.crowdcast.io/e/enterprise-api-security',
+                          'signupFreeTrail':'https://register.automation.ibm.com/apic/trial/aws',
+                          'presenters':'Swetha & Spoon'
+                      };
+
+
+                      session.output.write(jsonresponse);
+    finally: []
+  properties:
+    target-url:
+      value: https://6286c59c7864d2883e798884.mockapi.io/rewards
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /rewards
+paths:
+  /pointBalance:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+      schemes: []
+      security:
+        - clientID: []
+    parameters:
+      - name: memberID
+        in: query
+        type: integer
+  /redemption:
+    parameters:
+      - name: memberID
+        in: query
+        type: integer
+      - name: pointsToRedeem
+        in: query
+        type: integer
+      - name: transactionDescription
+        in: query
+        type: string
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      parameters: []
+      security:
+        - OAuth:
+            - topsecret
+        - clientID: []
+          AppSecret: []
+  /customerinfo:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      security:
+        - clientID: []
+  /pointBalanceWithRedact:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      security:
+        - clientID: []
+  /getFamilyMembers:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      security:
+        - clientID: []
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+  OAuth:
+    type: oauth2
+    x-ibm-oauth-provider: nativepasswordgrant
+    flow: password
+    tokenUrl: https://$(catalog.url)//oauth2/token
+    scopes:
+      read: Sample scope description 1
+      topsecret: ''
+  AppSecret:
+    type: apiKey
+    name: X-IBM-Client-Secret
+    in: header
+    x-key-type: client_secret
+security: []
+schemes:
+  - https

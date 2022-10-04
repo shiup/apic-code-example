@@ -1,0 +1,118 @@
+swagger: '2.0'
+info:
+  title: google-introspect
+  x-ibm-name: google-introspect
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - operation-switch:
+          version: 2.0.0
+          title: operation-switch
+          case:
+            - operations:
+                - verb: post
+                  path: /introspect
+              execute:
+                - gatewayscript:
+                    version: 2.0.0
+                    title: gatewayscript
+                    source: >+
+                      let hm = require('header-metadata');
+
+                      let urlopen = require ('urlopen');
+
+
+                      hm.response.set('content-type','application/json');
+
+
+                      let jsonresp = {active: false};
+
+
+                      context.request.body.readAsBuffer(function(error, buffer)
+                      {
+                          if (error) {
+                              console.error('readAsJSON error: '+error);
+                              session.output.write(jsonresp);
+                          } else {
+                              let bodyarr = buffer.toString().split('&');
+                              let token;
+                              for (let bodyele of bodyarr) {
+                                  if (bodyele.startsWith('token=')) {
+                                      token = bodyele.substring(6);
+                                      break;
+                                  }
+                              }
+                              
+                              if (!token || token.length === 0) {
+                                  console.error('missing token');
+                                  session.output.write(jsonresp);
+                              } else {
+                                  // to make urlopen call to actual third-party by build up the payload
+                                  let options = {
+                                      target: 'https://openidconnect.googleapis.com/v1/userinfo',
+                                      method: 'get',
+                                      headers: {}
+                                  };
+                                  options.headers.authorization = 'Bearer ' + token;
+                            //      urlopen.open (options, function (error, response) {
+                          //        if (error) {
+                            //              console.error ("urlopen connect error: " + JSON.stringify(error));
+                            //              session.output.write(jsonresp);
+                              //        } else {
+                                //          session.output.write(jsonresp);
+                                  //    }
+                              //    }); 
+
+                                  if (token !== 'badtoken') {
+                                      jsonresp.active = true;
+                                  } 
+                                  session.output.write(jsonresp);
+                              }
+                         }
+                      });
+
+
+                      //session.output.write(jsonresp);
+
+          otherwise: []
+    finally: []
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /google-introspect
+paths:
+  /introspect:
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+      security:
+        - clientID: []
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+schemes:
+  - https
+

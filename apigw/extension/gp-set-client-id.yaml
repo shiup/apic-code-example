@@ -1,0 +1,19 @@
+global-policy: 1.0.0
+
+info:
+  name: set-x-ibm-client-id
+  title: Content Services Global Policy
+  version: 1.0.0
+  mode: before-builtin
+  
+gateways:
+  - datapower-api-gateway
+assembly:
+  execute:
+    - gatewayscript:
+        version: 2.0.0
+        title: Set x-ibm-client-id header
+        source: >-
+          let client_id = 'abc'; // replace this with your logic to extract the client_id
+          context.set('request.headers.X-IBM-Client-Id', client_id);
+          var jwt = require('jwt');

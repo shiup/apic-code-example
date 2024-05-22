@@ -1,0 +1,174 @@
+swagger: '2.0'
+info:
+  title: test
+  x-ibm-name: test
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - operation-switch:
+          version: 1.0.0
+          title: operation-switch
+          case:
+            - operations:
+                - verb: post
+                  path: /test
+              execute:
+                - gatewayscript:
+                    version: 1.0.0
+                    title: gatewayscript
+                    source: |
+                      // curl -k https://security-v5-gw.wonderwoman.dev.ciondemand.com/steveorg/sandbox/test/test  --header 'X-IBM-Client-Id: 81b135111a37e3594641f4becaf25889' -X POST -d '{"a":true}'
+                      let jose = require('jose');
+
+                      let inputclaim = {"spoon":"your custom data"};
+
+                      let signKey = {
+                        "kty": "RSA",
+                        "kid": "signkeykid",
+                        "use": "sig",
+                        "d": "Na9hIud8n8tT3dbV9FVORBARrQLSUEXJbYVjO52Nlnae7qQYs_7dPFULxlx3eo42f_RhHxjA2TgM9YyF3BekYFz0IliwB_w-FfrX9WpZs9TM3LcFLhkV9GOc6-q96DGm1tdIbLBDa6Oo0RxesXwJJNGuaEyZwMAZUAA1aWz2dPRpEPegZ5xKfJu3j5QkiWtF4G_UXJZt2fnGBfeN1LrOkQH5rIg9L-Pj4X4Pcouj2oc2uDJYowh9vW3-xT6CgcMkPDSjiuaq_1fuSuHlEP-lQjjHV5n8zDAnGlokeFOT9WcXuckoNQIRuhqs5Xy5dxhzyeaE3g1AiH_gyY1stygQAQ",
+                        "n": "oFdAmem2GG3lNCtlthhd6J_CXcgn46DGFzPj3zPlNrUDA1ZETBuYHH4717rQtDLU_LtgxKyGYB6vaggW948qjFFkVg_23Hp6CP5-ifMKL-KznPj8th5bacycvzArVzPeu420nDNJoHCcezaJ_aDmun0IkyChztvMnxp28sNGJngpjS8Oj5hbXmMis8Ld6OTxtO_jsdXKd4Th_dbhCMT7g5jdTqRwGGvtnx7PTNPsXdEiZz5RYeJgbK-2y15mvDpCDNF8ZHBcj-f_yY1hWEbhFq0U6yam6Fl4wbi6Ov-NFBmZ33pG92AiSgAc4pFheG5O4B-9gZM_zlVP4zd29eKw8Q",
+                        "e": "AQAB"
+                      };
+
+                      let encKeyFull = {
+                        "kty": "RSA",
+                        "kid": "encryptKeykid",
+                        "use": "enc",
+                        "d": "NDtffEvRNkBFE17F0G8GGc27wvrmrMWfHJbAW2K319X_Gil2EPHRYRI3pYpxdcls49x3Cs6sFEZ5XL--XtMGfFsSmH5scvQWMk73yI9jIZF6xpyCxET0092u9prN5GsLZ0Cbc-X9Jt4vqP6RxbDQpAHj85JME8CHO_ntEkC1FcjbxNxC0qpLZg_GmfkNe-7EELgHtkF4sgBNKAMR1eWz4anQa0bbcCG-P4JIQtg10u92cns6z-5ADVesBAwFCAAkSEurG4-KWV7JbKaumOpBpMnbF1fVSpVpihY-MdxXxXUPv5FJpFo7D4kSZVfDow0C8vympzh1ld_0ZkG04m-oAQ",
+                        "n": "yUP4KwmYeaPu9L0wJ1PoDNJTk_f1CZPObDhOyGpA8QlBge9i5WMD5ZAlcfFqNWMFQeMGIVH8MO0uC_AIKqXE_OSHo8c9MOVn5J-UdphhEWi0gHiOGaTc-NAeKwOuG1kahpAORtM4yb5aLX1kfUT42QYj9y70xasnM8uivfrP7qLpGsFTkq5T0uVVY5BxZHcO0ZhaZgaP7dYbnU7hLg8j0HZUZR_ufSb5aP64G4yqI0RKi9GK8ovY_b5Tkd-pcd-84yRDHfT_unDJEWD6YZJGW-rj9qQY1pzQL3Fy_enQga2304Bkajp8g2_NySS8Mh5DCqDDsPJOgpEfYxCS4eHd5Q",
+                        "e": "AQAB"
+                      };
+
+                      let encKey = { };
+                      encKey.kty = encKeyFull.kty;
+                      encKey.kid = encKeyFull.kid;
+                      encKey.use = encKeyFull.use;
+                      encKey.n = encKeyFull.n;
+                      encKey.e = encKeyFull.e;
+
+                      // this can be 'compact' | 'json' | 'json_flat'
+                      let signFormat = 'compact';
+                      let encFormat = 'compact';
+
+                      apim.readInputAsJSON(function (error, json) {
+                      // session.input.readAsJSON (function (error, json) {
+                          if (error) {
+                            // an error occurred when parsing the content, e.g. invalid JSON object
+                            // uncatched error will stop the processing and the error will be logged
+                            apim.error('ReadFailure', 500, 'Internal Error', JSON.stringify(error));
+                          } else {
+
+                            // add claim to input
+                            json.message = inputclaim;
+
+                            // signed the payload
+                            let signedMsg;
+                            let output = {};
+                            let jwsHdr = jose.createJWSHeader(signKey, "RS256");
+                            jose.createJWSSigner(jwsHdr).update(JSON.stringify(json)).sign(signFormat, function(error, jwsObj) {
+                              if (error) {
+                                 //  session.reject(error.errorMessage);
+                                apim.error('SignFailure', 500, 'Internal Error', JSON.stringify(error));
+                              } else {
+                                output.firstSignedMsg = jwsObj;
+                                let jwsObjStr = jwsObj;
+                                if (typeof jwsObj === 'object') {
+                                  jwsObj = JSON.stringify(jwsObj);
+                                }
+
+                                jwsObjStr = jwsObj;
+                                output.firstSignedMsgStr = jwsObjStr;
+
+                                let jweHdr = jose.createJWEHeader('A128CBC-HS256');
+                                jweHdr.setProtected('alg', 'RSA1_5');
+                                jweHdr.setKey(encKey);
+                                jose.createJWEEncrypter(jweHdr).update(jwsObjStr).encrypt(encFormat, function(error, jweObj) {
+                                  if (error) {
+                                    // session.reject(error);
+                                    apim.error('EncFailure', 500, 'Internal Error', JSON.stringify(error));
+                                  } else {
+                                    apim.output("application/json");
+                                    apim.setvariable('message.status.code', 200);
+                                    session.output.write(jweObj);
+                                    
+                                    /*      
+                                    let parsedJweOject = jose.parse(jweObj);
+                                    parsedJweOject.setKey(encKeyFull);
+                           
+                                    jose.createJWEDecrypter(parsedJweOject).decrypt(function(error, plaintextBuf) {
+                                      if (error) {
+                                        apim.error('DecFailure', 500, 'Internal Error', JSON.stringify(error));
+                                      } else {
+                                        output.decryptedMsg = plaintextBuf.toString();
+                                        if (output.decryptedMsg === jwsObjStr) {
+                                          apim.output("application/json");
+                                          session.output.write({"good":"decrypted is equal to the signed content"});
+                                        } else {
+                                          session.output.write(output);
+                                        }
+                                      }
+                                    });
+                                    */      
+                                  } 
+                                });
+                              } 
+                            });
+                          }
+                      });
+            - operations:
+                - verb: get
+                  path: /test
+              execute:
+                - gatewayscript:
+                    version: 1.0.0
+                    title: gatewayscript
+                    source: |
+                      // curl -k https://security-v5-gw.wonderwoman.dev.ciondemand.com/steveorg/sandbox/test/test  --header 'X-IBM-Client-Id: 81b135111a37e3594641f4becaf25889' 
+                      let out = {"message":"Greeting! Hello World"};
+                      out.whoami = apim.getContext('api.endpoint.address');
+                      session.output.write(JSON.stringify(out));
+                      apim.output("application/json");
+                      apim.setvariable('message.status.code', 200);
+          otherwise: []
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+basePath: /test
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+securityDefinitions:
+  clientID:
+    type: apiKey
+    in: header
+    name: X-IBM-Client-Id
+security:
+  - clientID: []
+schemes:
+  - https

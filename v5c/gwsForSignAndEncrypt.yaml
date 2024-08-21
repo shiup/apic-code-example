@@ -90,6 +90,7 @@ x-ibm-configuration:
 
                                 let jweHdr = jose.createJWEHeader('A128CBC-HS256');
                                 jweHdr.setProtected('alg', 'RSA1_5');
+                                jweHdr.setProtected('kid', encKey.kid);
                                 jweHdr.setKey(encKey);
                                 jose.createJWEEncrypter(jweHdr).update(jwsObjStr).encrypt(encFormat, function(error, jweObj) {
                                   if (error) {

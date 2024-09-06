@@ -1,0 +1,262 @@
+swagger: '2.0'
+info:
+  title: 'API for JWT '
+  x-ibm-name: api-for-jwt
+  version: 1.0.0
+x-ibm-configuration:
+  cors:
+    enabled: true
+  gateway: datapower-api-gateway
+  type: rest
+  phase: realized
+  enforced: true
+  testable: true
+  assembly:
+    execute:
+      - set-variable:
+          version: 2.0.0
+          title: set-variable
+          actions:
+            - set: signingkey
+              value: >-
+                {"kty": "RSA", "kid": "signkeykid",  "use": "sig", "d":
+                "Na9hIud8n8tT3dbV9FVORBARrQLSUEXJbYVjO52Nlnae7qQYs_7dPFULxlx3eo42f_RhHxjA2TgM9YyF3BekYFz0IliwB_w-FfrX9WpZs9TM3LcFLhkV9GOc6-q96DGm1tdIbLBDa6Oo0RxesXwJJNGuaEyZwMAZUAA1aWz2dPRpEPegZ5xKfJu3j5QkiWtF4G_UXJZt2fnGBfeN1LrOkQH5rIg9L-Pj4X4Pcouj2oc2uDJYowh9vW3-xT6CgcMkPDSjiuaq_1fuSuHlEP-lQjjHV5n8zDAnGlokeFOT9WcXuckoNQIRuhqs5Xy5dxhzyeaE3g1AiH_gyY1stygQAQ",                        
+                "n":
+                "oFdAmem2GG3lNCtlthhd6J_CXcgn46DGFzPj3zPlNrUDA1ZETBuYHH4717rQtDLU_LtgxKyGYB6vaggW948qjFFkVg_23Hp6CP5-ifMKL-KznPj8th5bacycvzArVzPeu420nDNJoHCcezaJ_aDmun0IkyChztvMnxp28sNGJngpjS8Oj5hbXmMis8Ld6OTxtO_jsdXKd4Th_dbhCMT7g5jdTqRwGGvtnx7PTNPsXdEiZz5RYeJgbK-2y15mvDpCDNF8ZHBcj-f_yY1hWEbhFq0U6yam6Fl4wbi6Ov-NFBmZ33pG92AiSgAc4pFheG5O4B-9gZM_zlVP4zd29eKw8Q",
+                "e": "AQAB" }
+              type: string
+            - set: iss.claim
+              value: https://issuer.com/acme-issuer
+              type: string
+            - set: sub.claim
+              value: cn=alice,ou=spoon
+              type: string
+            - set: verifykey
+              value: >-
+                {"e": "AQAB","n":
+                "oFdAmem2GG3lNCtlthhd6J_CXcgn46DGFzPj3zPlNrUDA1ZETBuYHH4717rQtDLU_LtgxKyGYB6vaggW948qjFFkVg_23Hp6CP5-ifMKL-KznPj8th5bacycvzArVzPeu420nDNJoHCcezaJ_aDmun0IkyChztvMnxp28sNGJngpjS8Oj5hbXmMis8Ld6OTxtO_jsdXKd4Th_dbhCMT7g5jdTqRwGGvtnx7PTNPsXdEiZz5RYeJgbK-2y15mvDpCDNF8ZHBcj-f_yY1hWEbhFq0U6yam6Fl4wbi6Ov-NFBmZ33pG92AiSgAc4pFheG5O4B-9gZM_zlVP4zd29eKw8Q",
+                "alg": "RS256","kid":"signkeyid","kty": "RSA","use": "sig"}
+              type: string
+      - operation-switch:
+          version: 2.0.0
+          title: operation-switch
+          case:
+            - operations:
+                - verb: delete
+                  path: /
+                - verb: get
+                  path: /
+              execute:
+                - set-variable:
+                    version: 2.0.0
+                    title: set-variable
+                    actions:
+                      - set: iss.claim
+                        value: https://bcbcssc.com/issueclaim
+                        type: string
+                      - set: sub.claim
+                        value: https://bcbcssc.com/subject
+                        type: string
+                      - set: signedjwk
+                        value: >-
+                          { "kty": "RSA",                         "kid":
+                          "signkeykid",                         "use":
+                          "sig",                         "d":
+                          "Na9hIud8n8tT3dbV9FVORBARrQLSUEXJbYVjO52Nlnae7qQYs_7dPFULxlx3eo42f_RhHxjA2TgM9YyF3BekYFz0IliwB_w-FfrX9WpZs9TM3LcFLhkV9GOc6-q96DGm1tdIbLBDa6Oo0RxesXwJJNGuaEyZwMAZUAA1aWz2dPRpEPegZ5xKfJu3j5QkiWtF4G_UXJZt2fnGBfeN1LrOkQH5rIg9L-Pj4X4Pcouj2oc2uDJYowh9vW3-xT6CgcMkPDSjiuaq_1fuSuHlEP-lQjjHV5n8zDAnGlokeFOT9WcXuckoNQIRuhqs5Xy5dxhzyeaE3g1AiH_gyY1stygQAQ",                        
+                          "n":
+                          "oFdAmem2GG3lNCtlthhd6J_CXcgn46DGFzPj3zPlNrUDA1ZETBuYHH4717rQtDLU_LtgxKyGYB6vaggW948qjFFkVg_23Hp6CP5-ifMKL-KznPj8th5bacycvzArVzPeu420nDNJoHCcezaJ_aDmun0IkyChztvMnxp28sNGJngpjS8Oj5hbXmMis8Ld6OTxtO_jsdXKd4Th_dbhCMT7g5jdTqRwGGvtnx7PTNPsXdEiZz5RYeJgbK-2y15mvDpCDNF8ZHBcj-f_yY1hWEbhFq0U6yam6Fl4wbi6Ov-NFBmZ33pG92AiSgAc4pFheG5O4B-9gZM_zlVP4zd29eKw8Q",                        
+                          "e": "AQAB"                       }
+                        type: string
+                - jwt-generate:
+                    version: 2.1.0
+                    title: jwt-generate
+                    jwt: generated.jwt
+                    iss-claim: iss.claim
+                    exp-claim: 3600
+                    jws-jwk: signedjwk
+                    sub-claim: sub.claim
+                - invoke:
+                    version: 2.0.0
+                    title: invoke
+                    backend-type: detect
+                    header-control:
+                      type: blocklist
+                      values: []
+                    parameter-control:
+                      type: allowlist
+                      values: []
+                    timeout: 60
+                    verb: keep
+                    chunked-uploads: true
+                    persistent-connection: true
+                    target-url: https://httpbin.org/json
+                    follow-redirects: false
+                    inject-proxy-headers: true
+                    tls-profile: mtls-for-backend:1.0.0
+            - operations:
+                - verb: get
+                  path: /generate
+              execute:
+                - jwt-generate:
+                    version: 2.1.0
+                    title: jwt-generate
+                    jwt: ''
+                    iss-claim: iss.claim
+                    exp-claim: 3600
+                    sub-claim: sub.claim
+                    jti-claim: true
+                    jws-jwk: signingkey
+                    custom-kid-value-jws: signkeykid
+                    jws-alg: RS256
+                - invoke:
+                    version: 2.3.0
+                    title: invoke
+                    backend-type: detect
+                    header-control:
+                      type: blocklist
+                      values: []
+                    parameter-control:
+                      type: allowlist
+                      values: []
+                    http-version: HTTP/1.1
+                    timeout: 60
+                    verb: keep
+                    chunked-uploads: true
+                    persistent-connection: true
+                    cache-response: protocol
+                    cache-ttl: 900
+                    stop-on-error: []
+                    websocket-upgrade: false
+                    graphql-send-type: detect
+                    target-url: https://httpbin.org/get
+            - operations:
+                - verb: get
+                  path: /validate
+              execute:
+                - jwt-validate:
+                    version: 2.0.0
+                    title: jwt-validate
+                    jwt: request.headers.authorization
+                    output-claims: decoded.claims
+                    jws-jwk: verifykey
+                - gatewayscript:
+                    version: 2.0.0
+                    title: gatewayscript
+                    source: >-
+                      let hm=require('header-metadata');
+                      hm.response.set('content-type','application/json'); let
+                      jsonresponse = {'name':'spoon','id':888,'address':'88
+                      Wicked Street, San Mateo, CA,
+                      94403','phone':'888-88-8888'};
+                      jsonresponse.decoded_token =
+                      context.get('decoded.claims');
+                      session.output.write(jsonresponse);
+            - operations:
+                - verb: get
+                  path: /ping
+              execute:
+                - invoke:
+                    version: 2.3.0
+                    title: invoke
+                    backend-type: detect
+                    header-control:
+                      type: blocklist
+                      values: []
+                    parameter-control:
+                      type: allowlist
+                      values: []
+                    http-version: HTTP/1.1
+                    timeout: 60
+                    verb: keep
+                    chunked-uploads: true
+                    persistent-connection: true
+                    cache-response: protocol
+                    cache-ttl: 900
+                    stop-on-error: []
+                    websocket-upgrade: false
+                    graphql-send-type: detect
+                    target-url: https://httpbin.org/get
+          otherwise: []
+  properties:
+    target-url:
+      value: http://example.com/operation-name
+      description: The URL of the target service
+      encoded: false
+  activity-log:
+    enabled: true
+    success-content: activity
+    error-content: payload
+basePath: /api-for-jwt
+paths:
+  /:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    put:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    post:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    delete:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    head:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+    patch:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+      consumes: []
+      produces: []
+  /generate:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+  /validate:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+  /ping:
+    get:
+      responses:
+        '200':
+          description: success
+          schema:
+            type: string
+schemes:
+  - https
